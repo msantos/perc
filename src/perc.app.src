@@ -1,0 +1,3 @@
+{application, perc,
+    [{description, "Interface to Unix processes"},
+    {vsn, "0.01"}]}.
