@@ -31,7 +31,10 @@
 -module(perc).
 
 -export([
-    kill/2
+    kill/2,
+
+    % Linux only
+    prlimit/4
     ]).
 
 -on_load(on_load/0).
@@ -41,6 +44,9 @@ on_load() ->
     erlang:load_nif(progname(), []).
 
 kill(_,_) ->
+    erlang:error(not_implemented).
+
+prlimit(_,_,_,_) ->
     erlang:error(not_implemented).
 
 progname() ->
