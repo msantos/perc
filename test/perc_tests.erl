@@ -46,6 +46,16 @@ kill_errno_test() ->
     {error, einval} = perc:kill(1, 1000),
     {error, eperm} = perc:kill(1, 1).
 
+prlimit_test() ->
+    Fd = <<128:8/native-unsigned-integer-unit:8,
+           128:8/native-unsigned-integer-unit:8>>,
+
+    case perc:prlimit(0, rlimit_nofile, Fd, <<>>) of
+        {error, unsupported} -> ok;
+        {ok, Fd, <<>>} ->
+            {ok, <<>>, Fd} = perc:prlimit(0, rlimit_nofile, <<>>, <<0:128>>)
+    end.
+
 as_int(Res) ->
     "\n" ++ N = lists:reverse(Res),
     list_to_integer(lists:reverse(N)).
