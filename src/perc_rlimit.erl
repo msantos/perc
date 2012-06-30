@@ -28,41 +28,31 @@
 %% LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 %% ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 %% POSSIBILITY OF SUCH DAMAGE.
--module(perc).
+-module(perc_rlimit).
 
 -export([
-    kill/2,
-
-    % Linux only
-    prlimit/4
+    define/1
     ]).
 
--on_load(on_load/0).
 
-
-on_load() ->
-    erlang:load_nif(progname(), []).
-
-kill(_,_) ->
-    erlang:error(not_implemented).
-
-prlimit(Pid, Resource, New, Old) when is_atom(Resource) ->
-    prlimit(Pid, perc_rlimit:define(Resource), New, Old);
-prlimit(Pid, Resource, New, Old) ->
-    prlimit_nif(Pid, Resource, New, Old).
-
-prlimit_nif(_,_,_,_) ->
-    erlang:error(not_implemented).
-
-progname() ->
-    case code:priv_dir(?MODULE) of
-        {error,bad_name} ->
-            filename:join([
-                filename:dirname(code:which(?MODULE)),
-                    "..",
-                    "priv",
-                    ?MODULE
-                ]);
-        Dir ->
-            filename:join([Dir,?MODULE])
-    end.
+% XXX 64 bit values only supported
+define(rlimit_cpu) -> 0;
+define(rlimit_fsize) -> 1;
+define(rlimit_data) -> 2;
+define(rlimit_stack) -> 3;
+define(rlimit_core) -> 4;
+define(rlimit_rss) -> 5;
+define(rlimit_nproc) -> 6;
+define(rlimit_nofile) -> 7;
+define(rlimit_ofile) -> define(rlimit_nofile);
+define(rlimit_memlock) -> 8;
+define(rlimit_as) -> 9;
+define(rlimit_locks) -> 10;
+define(rlimit_sigpending) -> 11;
+define(rlimit_msgqueue) -> 12;
+define(rlimit_nice) -> 13;
+define(rlimit_rtprio) -> 14;
+define(rlimit_rttime) -> 15;
+define(rlimit_nlimits) -> 16;
+define(rlim_infinity) -> 16#ffffffffffffffff;
+define(rlim64_infinity) -> define(rlim_infinity).

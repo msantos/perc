@@ -138,7 +138,7 @@ nif_prlimit(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
 static ErlNifFunc nif_funcs[] = {
     {"kill", 2, nif_kill},
-    {"prlimit", 4, nif_prlimit}
+    {"prlimit_nif", 4, nif_prlimit}
 };
 
 ERL_NIF_INIT(perc, nif_funcs, load, reload, upgrade, unload)
