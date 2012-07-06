@@ -18,6 +18,48 @@ perc is an Erlang interface for controlling Unix processes.
 
         Sending a signal to PID 0 will send the signal to the Erlang VM.
 
+    getpriority(Which, Who) -> {ok, integer()} | {error, posix()}
+
+        Types   Which = integer()
+                Who = integer()
+
+        See getpriority(2).
+
+        Get the priority (the "nice" value) of processes by pid, process
+        group or user.
+
+    setpriority(Which, Who, Prio) -> ok | {error, posix()}
+
+        Types   Which = integer()
+                Who = integer()
+                Prio = integer()
+
+        See setpriority(2).
+
+        Set the priority (the "nice" value) of processes by pid, process
+        group or user.
+
+    renice(Type, Prio) -> {ok, NewPrio} | {error, posix()}
+
+        Types   Type = {Which, Who}
+                Which = pid | pgrp | user
+                Who = integer()
+                Prio = integer() | string()
+                NewPrio = integer()
+
+        Convenience wrapper around getpriority/2 and setpriority/3,
+        similar to renice(1).
+
+        WARNING: renice/2 makes successive calls to getpriority/2 and
+        setpriority/3. Since this sequence is not atomic, the priority
+        may change between calls or the process may have been terminated.
+
+        Sets the priority of a process or processes by pid, pgroup or
+        user and returns the new priority. The new priority may be an
+        integer or a list containing a relative priority, indicated by
+        using a "+" or "-". For example, using "+10" will increase the
+        niceness of the process by 10.
+
     prlimit(Pid, Resource, NewLimit, OldLimit) -> {ok, NewLimit1, OldLimit1} | {error, Error}
 
         Types   Pid = integer()
@@ -93,6 +135,20 @@ perc is an Erlang interface for controlling Unix processes.
     3> file:open("/etc/passwd", [read]).
     {error,emfile}
 
+### setpriority(2)/getpriority(2)
+
+    % PRIO_PROCESS = 0
+    1> perc:getpriority(0, 0).
+    {ok, 0}
+
+    2> perc:setpriority(0, 0, 10).
+    ok
+
+    3> perc:getpriority(0, 0).
+    {ok, 10}
+
+    4> perc:renice({pid, 0}, "-5").
+    {ok, 5}
 
 ## TODO
 

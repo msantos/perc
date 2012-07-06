@@ -33,6 +33,10 @@
 -export([
     kill/2,
 
+    renice/2,
+    getpriority/2,
+    setpriority/3,
+
     % Linux only
     prlimit/4
     ]).
@@ -46,6 +50,42 @@ on_load() ->
 kill(_,_) ->
     erlang:error(not_implemented).
 
+getpriority(_,_) ->
+    erlang:error(not_implemented).
+
+setpriority(_,_,_) ->
+    erlang:error(not_implemented).
+
+renice(Type, Priority) ->
+    {Which, Who} = prio(Type),
+    case renice(Which, Who, Priority) of
+        ok ->
+            getpriority(Which, Who);
+        Error ->
+            Error
+    end.
+
+renice(Which, Who, "+" ++ Priority) ->
+    case getpriority(Which, Who) of
+        {ok, OldPrio} ->
+            N = list_to_integer(Priority),
+            setpriority(Which, Who, OldPrio + N);
+        Error ->
+            Error
+    end;
+renice(Which, Who, "-" ++ Priority) ->
+    case getpriority(Which, Who) of
+        {ok, OldPrio} ->
+            N = list_to_integer(Priority),
+            setpriority(Which, Who, OldPrio - N);
+        Error ->
+            Error
+    end;
+renice(Which, Who, Priority) when is_list(Priority) ->
+    setpriority(Which, Who, list_to_integer(Priority));
+renice(Which, Who, Priority) when is_integer(Priority) ->
+    setpriority(Which, Who, Priority).
+
 prlimit(Pid, Resource, New, Old) when is_atom(Resource) ->
     prlimit(Pid, perc_rlimit:define(Resource), New, Old);
 prlimit(Pid, Resource, New, Old) ->
@@ -53,6 +93,15 @@ prlimit(Pid, Resource, New, Old) ->
 
 prlimit_nif(_,_,_,_) ->
     erlang:error(not_implemented).
+
+prio({pid, N}) ->
+    {perc_prio:define(prio_process), N};
+prio({pgrp, N}) ->
+    {perc_prio:define(prio_pgrp), N};
+prio({user, N}) ->
+    {perc_prio:define(prio_user), N};
+prio(N) when is_integer(N) ->
+    {perc_prio:define(prio_process), N}.
 
 progname() ->
     case code:priv_dir(?MODULE) of

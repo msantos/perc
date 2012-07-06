@@ -33,9 +33,10 @@
 #include <signal.h>
 #include <errno.h>
 
-#ifdef HAVE_PRLIMIT
 #include <sys/time.h>
 #include <sys/resource.h>
+
+#ifdef HAVE_PRLIMIT
 #pragma message "Enabling support for prlimit(2)"
 #endif
 
@@ -96,6 +97,53 @@ nif_kill(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
     static ERL_NIF_TERM
+nif_getpriority(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    int which = 0;
+    int who = 0;
+
+    int prio = 0;
+
+
+    if (!enif_get_int(env, argv[0], &which))
+        return enif_make_badarg(env);
+
+    if (!enif_get_int(env, argv[1], &who))
+        return enif_make_badarg(env);
+
+    errno = 0;
+    if ( ((prio = getpriority(which, who)) == -1) && (errno != 0))
+        return enif_make_tuple2(env, atom_error,
+            enif_make_atom(env, erl_errno_id(errno)));
+
+    return enif_make_tuple2(env, atom_ok, enif_make_int(env, prio));
+}
+
+    static ERL_NIF_TERM
+nif_setpriority(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    int which = 0;
+    int who = 0;
+    int prio = 0;
+
+
+    if (!enif_get_int(env, argv[0], &which))
+        return enif_make_badarg(env);
+
+    if (!enif_get_int(env, argv[1], &who))
+        return enif_make_badarg(env);
+
+    if (!enif_get_int(env, argv[2], &prio))
+        return enif_make_badarg(env);
+
+    if (setpriority(which, who, prio) == -1)
+        return enif_make_tuple2(env, atom_error,
+            enif_make_atom(env, erl_errno_id(errno)));
+
+    return atom_ok;
+}
+
+    static ERL_NIF_TERM
 nif_prlimit(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
 #ifdef HAVE_PRLIMIT
@@ -138,6 +186,10 @@ nif_prlimit(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
 static ErlNifFunc nif_funcs[] = {
     {"kill", 2, nif_kill},
+
+    {"getpriority", 2, nif_getpriority},
+    {"setpriority", 3, nif_setpriority},
+
     {"prlimit_nif", 4, nif_prlimit}
 };
 

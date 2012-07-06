@@ -28,50 +28,9 @@
 %% LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 %% ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 %% POSSIBILITY OF SUCH DAMAGE.
--module(perc_tests).
 
--compile(export_all).
-
--include_lib("eunit/include/eunit.hrl").
-
+-define(PRIO_MIN, perc_prio:define(prio_min)).
+-define(PRIO_MAX, perc_prio:define(prio_max)).
 -define(PRIO_PROCESS, perc_prio:define(prio_process)).
-
-kill_test() ->
-    Res = os:cmd("sleep 60 & echo $!"),
-    Pid = as_int(Res),
-    ok = perc:kill(Pid, 9),
-    timer:sleep(1), % sleep for the process to be reaped
-    {error, esrch} = perc:kill(Pid, 9).
-
-kill_errno_test() ->
-    {error, einval} = perc:kill(1, 1000),
-    {error, eperm} = perc:kill(1, 1).
-
-prlimit_test() ->
-    Fd = <<128:8/native-unsigned-integer-unit:8,
-           128:8/native-unsigned-integer-unit:8>>,
-
-    case perc:prlimit(0, rlimit_nofile, Fd, <<>>) of
-        {error, unsupported} -> ok;
-        {ok, Fd, <<>>} ->
-            {ok, <<>>, Fd} = perc:prlimit(0, rlimit_nofile, <<>>, <<0:128>>)
-    end.
-
-prio_test() ->
-    Res = os:cmd("sleep 60 & echo $!"),
-    Pid = as_int(Res),
-
-    {ok, 0} = perc:getpriority(?PRIO_PROCESS, Pid),
-    ok = perc:setpriority(?PRIO_PROCESS, Pid, 10),
-    {ok, 10} = perc:getpriority(?PRIO_PROCESS, Pid),
-
-    {error, eacces} = perc:setpriority(?PRIO_PROCESS, Pid, -10),
-
-    {ok, 5} = perc:renice({pid, Pid}, "-5"),
-    {ok, 15} = perc:renice({pid, Pid}, "+10"),
-
-    ok = perc:kill(Pid, 9).
-
-as_int(Res) ->
-    "\n" ++ N = lists:reverse(Res),
-    list_to_integer(lists:reverse(N)).
+-define(PRIO_PGRP, perc_prio:define(prio_pgrp)).
+-define(PRIO_USER, perc_prio:define(prio_user)).
