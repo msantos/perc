@@ -97,9 +97,6 @@ init([Pid, Mask]) ->
     end.
 
 
-%%
-%% retrieve/modify gen_server state
-%%
 handle_call(getfd, _From, #state{fd = FD} = State) ->
     {reply, FD, State};
 
@@ -109,47 +106,10 @@ handle_call(stop, _From, State) ->
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
-%%
-%% {active, true} mode
-%%
-handle_info({Port, {data, <<
-        ?UINT32(Signo),     % Signal number
-        ?INT32(Errno),      % Error number (unused)
-        ?INT32(Code),       % Signal code
-        ?UINT32(Pid),       % PID of sender
-        ?UINT32(Uid),       % Real UID of sender
-        ?INT32(Fd),         % File descriptor (SIGIO)
-        ?UINT32(Tid),       % Kernel timer ID (POSIX timers)
-        ?UINT32(Band),      % Band event (SIGIO)
-        ?UINT32(Overrun),   % POSIX timer overrun count
-        ?UINT32(Trapno),    % Trap number that caused signal
-        ?INT32(Status),     % Exit status or signal (SIGCHLD)
-        ?INT32(Int),        % Integer sent by sigqueue(2)
-        ?UINT64(Ptr),       % Pointer sent by sigqueue(2)
-        ?UINT64(Utime),     % User CPU time consumed (SIGCHLD)
-        ?UINT64(Stime),     % System CPU time consumed (SIGCHLD)
-        ?UINT64(Addr),      % Address that generated signal (for hardware-generated signals)
-        Pad/binary          % Pad size to 128 bytes (allow for additional fields in the future)
-    >> = Data}}, #state{port = Port, pid = Caller} = State) when byte_size(Data) =:= 128 ->
-    Caller ! {signal, self(), #signalfd_siginfo{
-        ssi_signo = Signo,
-        ssi_errno = Errno,
-        ssi_code = Code,
-        ssi_pid = Pid,
-        ssi_uid = Uid,
-        ssi_fd = Fd,
-        ssi_tid = Tid,
-        ssi_band = Band,
-        ssi_overrun = Overrun,
-        ssi_trapno = Trapno,
-        ssi_status = Status,
-        ssi_int = Int,
-        ssi_ptr = Ptr,
-        ssi_utime = Utime,
-        ssi_stime = Stime,
-        ssi_addr = Addr,
-        pad = Pad
-    }},
+%% Signal received
+handle_info({Port, {data, Data}}, #state{port = Port, pid = Pid} = State) ->
+    [ Pid ! {signal, self(), signalfd_siginfo(Signal)} ||
+        <<Signal:128/binary>> <= Data ],
     {noreply, State};
 
 % WTF?
@@ -280,3 +240,8 @@ signalfd_siginfo(#signalfd_siginfo{
         ?UINT64(Addr),      % Address that generated signal (for hardware-generated signals)
         Pad/binary          % Pad size to 128 bytes (allow for additional fields in the future)
     >>.
+
+
+%%--------------------------------------------------------------------
+%%% Internal functions
+%%--------------------------------------------------------------------

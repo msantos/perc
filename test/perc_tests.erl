@@ -87,15 +87,11 @@ signalfd_test() ->
     end.
 
 signalfd_test_create() ->
-    %Signals = [sigusr1, sigusr2, sighup, sigterm],
-    Signals = [sigusr1],
+    Signals = [sigusr1, sigterm, sigusr2, sighup],
     {ok, Ref} = perc_signal:start(Signals),
 
     spawn(fun() ->
-                [ begin
-                    timer:sleep(1000),
-                    perc:kill(0, Signal)
-                 end || Signal <- Signals ]
+                [ perc:kill(0, Signal) || Signal <- Signals ]
           end),
 
     signalfd_test_poll(Ref, Signals).
