@@ -39,7 +39,8 @@
 
     % Linux only
     prlimit/4,
-    signalfd/1, sigaddset/1, close/1
+    signalfd/1, signalfd/2,
+    sigaddset/1, close/1
     ]).
 
 -on_load(on_load/0).
@@ -114,7 +115,13 @@ sigaddset_nif(_) ->
 close(_) ->
     erlang:error(not_implemented).
 
-signalfd(_) ->
+signalfd(Mask) ->
+    signalfd(-1, Mask).
+
+signalfd(Fd, Mask) ->
+    signalfd_nif(Fd, Mask).
+
+signalfd_nif(_,_) ->
     erlang:error(not_implemented).
 
 prio({pid, N}) ->

@@ -155,9 +155,13 @@ nif_signalfd(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 #ifdef HAVE_SIGNALFD
     int fd = 0;
     ErlNifBinary mask = {0};
+    int rv = 0;
 
 
-    if (!enif_inspect_binary(env, argv[0], &mask) || mask.size != sizeof(sigset_t))
+    if (!enif_get_int(env, argv[0], &fd))
+        return enif_make_badarg(env);
+
+    if (!enif_inspect_binary(env, argv[1], &mask) || mask.size != sizeof(sigset_t))
         return enif_make_badarg(env);
 
     /* According to sigprocmask(2):
@@ -176,11 +180,11 @@ nif_signalfd(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         return enif_make_tuple2(env, atom_error,
             enif_make_atom(env, erl_errno_id(errno)));
 
-    if ( (fd = signalfd(-1, (sigset_t *)mask.data, SFD_NONBLOCK|SFD_CLOEXEC)) < 0)
+    if ( (rv = signalfd(fd, (sigset_t *)mask.data, SFD_NONBLOCK|SFD_CLOEXEC)) < 0)
         return enif_make_tuple2(env, atom_error,
             enif_make_atom(env, erl_errno_id(errno)));
 
-    return enif_make_tuple2(env, atom_ok, enif_make_int(env, fd));
+    return enif_make_tuple2(env, atom_ok, enif_make_int(env, rv));
 #else
     return enif_make_tuple2(env, atom_error, atom_unsupported);
 #endif
@@ -293,9 +297,10 @@ static ErlNifFunc nif_funcs[] = {
 
     {"prlimit_nif", 4, nif_prlimit},
 
+    /* signal handling */
     {"close", 1, nif_close},
-    {"signalfd", 1, nif_signalfd},
-    {"sigaddset_nif", 1, nif_sigaddset}
+    {"sigaddset_nif", 1, nif_sigaddset},
+    {"signalfd_nif", 2, nif_signalfd}
 };
 
 ERL_NIF_INIT(perc, nif_funcs, load, reload, upgrade, unload)
