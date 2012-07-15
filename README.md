@@ -7,6 +7,8 @@ perc is an Erlang interface for controlling Unix processes.
 
 ## EXPORTS
 
+### perc
+
     kill(Pid, Signal) -> ok | {error, posix()}
     
         Types   Pid = integer()
@@ -97,7 +99,79 @@ perc is an Erlang interface for controlling Unix processes.
         The binary size of NewLimit/OldLimit must otherwise match the size
         of a struct rlimit for the platform. struct rlimit is usually
         composed of two 8 byte values in native format. To retrieve the
-        current settings, pass in a zero'ed 16 byte value.
+        current settings, pass in a zeroed 16 byte value.
+
+### perc_signal
+
+        start(Signals) -> {ok, pid()} | {error, enomem}
+
+            Types   Signals = [ Signal ]
+                    Signal = integer() | Names
+                    Names = sighup
+                        | sigint
+                        | sigquit
+                        | sigill
+                        | sigtrap
+                        | sigabrt
+                        | sigbus
+                        | sigfpe
+                        | sigkill
+                        | sigusr1
+                        | sigsegv
+                        | sigusr2
+                        | sigpipe
+                        | sigalrm
+                        | sigterm
+                        | sigstkflt
+                        | sigchld
+                        | sigcont
+                        | sigstop
+                        | sigtstp
+                        | sigttin
+                        | sigttou
+                        | sigurg
+                        | sigxcpu
+                        | sigxfsz
+                        | sigvtalrm
+                        | sigprof
+                        | sigwinch
+                        | sigio
+                        | sigpwr
+                        | sigsys
+                        | sigrtmin
+                        | sigrtmax
+
+        Linux only: on other platforms, {error, unsupported} will be
+        returned to the caller.
+
+        Receive notification when the beam process receives a signal:
+
+            {signal, pid(), #signalfd_siginfo{}}
+
+        The tuple contains the PID of the gen_server and information
+        about the signal. See signalfd(2) for details about the returned
+        data. For example, to match the signal number:
+
+            -include_lib("perc/include/perc_signal.hrl").
+
+            start() ->
+                {ok, Ref} = perc_signal:start([sighup]),
+
+                receive
+                    {signal, Ref, #signalfd_siginfo{
+                        ssi_signo = 1,
+                        ssi_pid = Pid,
+                        ssi_uid = UID,
+                        }} ->
+                        error_logger:info_report([
+                            {sending_pid, Pid},
+                            {sending_uid, UID}
+                            ])
+                end.
+
+    stop(Ref) -> ok
+
+        Stop the gen_server and close the signalfd file descriptor.
 
 
 ## EXAMPLES
