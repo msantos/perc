@@ -1,21 +1,21 @@
 /* Copyright (c) 2012, Michael Santos <michael.santos@gmail.com>
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- * 
+ *
  * Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 
+ *
  * Neither the name of the author nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -32,9 +32,15 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <sys/time.h>
 #include <sys/resource.h>
+
+#ifdef HAVE_SIGNALFD
+#pragma message "Enabling support for signalfd(2)"
+#include <sys/signalfd.h>
+#endif
 
 #ifdef HAVE_PRLIMIT
 #pragma message "Enabling support for prlimit(2)"
@@ -144,6 +150,101 @@ nif_setpriority(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
     static ERL_NIF_TERM
+nif_signalfd(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+#ifdef HAVE_SIGNALFD
+    int fd = 0;
+    ErlNifBinary mask = {0};
+
+
+    if (!enif_inspect_binary(env, argv[0], &mask) || mask.size != sizeof(sigset_t))
+        return enif_make_badarg(env);
+
+    /* According to sigprocmask(2):
+     *
+     *  "The use of sigprocmask() is unspecified in a multithreaded
+     *   process; see pthread_sigmask(3)."
+     *
+     * And pthread_sigmask(3):
+     *
+     *  "The  pthread_sigmask()  function is just like sigprocmask(2),
+     *   with the difference that its use in multithreaded programs is
+     *   explicitly specified by POSIX.1-2001."
+     *
+     */
+    if (pthread_sigmask(SIG_BLOCK, (sigset_t *)mask.data, NULL) < 0)
+        return enif_make_tuple2(env, atom_error,
+            enif_make_atom(env, erl_errno_id(errno)));
+
+    if ( (fd = signalfd(-1, (sigset_t *)mask.data, SFD_NONBLOCK|SFD_CLOEXEC)) < 0)
+        return enif_make_tuple2(env, atom_error,
+            enif_make_atom(env, erl_errno_id(errno)));
+
+    return enif_make_tuple2(env, atom_ok, enif_make_int(env, fd));
+#else
+    return enif_make_tuple2(env, atom_error, atom_unsupported);
+#endif
+}
+
+    static ERL_NIF_TERM
+nif_sigaddset(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+#ifdef HAVE_SIGNALFD
+    sigset_t mask = {{0}};
+    ERL_NIF_TERM head = {0};
+    ERL_NIF_TERM tail = {0};
+    ErlNifBinary bin = {0};
+
+
+    if (!enif_is_list(env, argv[0]))
+        return enif_make_badarg(env);
+
+    sigemptyset(&mask);
+    tail = argv[0];
+
+    while (enif_get_list_cell(env, tail, &head, &tail)) {
+        int sig = 0;
+
+        if (!enif_get_int(env, head, &sig))
+            return enif_make_badarg(env);
+
+        sigaddset(&mask, sig);
+    }
+
+    if (!enif_alloc_binary(sizeof(mask), &bin))
+        return enif_make_tuple2(env, atom_error,
+            enif_make_atom(env, erl_errno_id(ENOMEM)));
+
+    (void)memcpy(bin.data, &mask, sizeof(mask));
+
+    return enif_make_tuple2(env, atom_ok, enif_make_binary(env, &bin));
+#else
+    return enif_make_tuple2(env, atom_error, atom_unsupported);
+#endif
+}
+
+    static ERL_NIF_TERM
+nif_close(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+#ifdef HAVE_SIGNALFD
+    int fd;
+
+
+    if (!enif_get_int(env, argv[0], &fd))
+        return enif_make_badarg(env);
+
+    if (close(fd) < 0)
+        return enif_make_tuple2(env, atom_error,
+            enif_make_atom(env, erl_errno_id(errno)));
+
+    return atom_ok;
+#else
+    return enif_make_tuple2(env, atom_error, atom_unsupported);
+#endif
+}
+
+
+    static ERL_NIF_TERM
 nif_prlimit(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
 #ifdef HAVE_PRLIMIT
@@ -185,12 +286,16 @@ nif_prlimit(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
 
 static ErlNifFunc nif_funcs[] = {
-    {"kill", 2, nif_kill},
+    {"kill_nif", 2, nif_kill},
 
     {"getpriority", 2, nif_getpriority},
     {"setpriority", 3, nif_setpriority},
 
-    {"prlimit_nif", 4, nif_prlimit}
+    {"prlimit_nif", 4, nif_prlimit},
+
+    {"close", 1, nif_close},
+    {"signalfd", 1, nif_signalfd},
+    {"sigaddset_nif", 1, nif_sigaddset}
 };
 
 ERL_NIF_INIT(perc, nif_funcs, load, reload, upgrade, unload)

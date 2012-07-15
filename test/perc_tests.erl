@@ -33,6 +33,7 @@
 -compile(export_all).
 
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("perc/include/perc_signal.hrl").
 
 -define(PRIO_PROCESS, perc_prio:define(prio_process)).
 
@@ -76,6 +77,44 @@ prio_test() ->
     end,
 
     ok = perc:kill(Pid, 9).
+
+signalfd_test() ->
+    case perc:sigaddset([]) of
+        {ok, _} ->
+            signalfd_test_create();
+        {error, unsupported} ->
+            ok
+    end.
+
+signalfd_test_create() ->
+    %Signals = [sigusr1, sigusr2, sighup, sigterm],
+    Signals = [sigusr1],
+    {ok, Ref} = perc_signal:start(Signals),
+
+    spawn(fun() ->
+                [ begin
+                    timer:sleep(1000),
+                    perc:kill(0, Signal)
+                 end || Signal <- Signals ]
+          end),
+
+    signalfd_test_poll(Ref, Signals).
+
+signalfd_test_poll(Ref, []) ->
+    perc_signal:stop(Ref);
+signalfd_test_poll(Ref, Signals) ->
+    receive
+        {signal, Ref, #signalfd_siginfo{ssi_signo = ?SIGHUP}} ->
+            signalfd_test_poll(Ref, Signals -- [sighup]);
+        {signal, Ref, #signalfd_siginfo{ssi_signo = ?SIGTERM}} ->
+            signalfd_test_poll(Ref, Signals -- [sigterm]);
+        {signal, Ref, #signalfd_siginfo{ssi_signo = ?SIGUSR1}} ->
+            signalfd_test_poll(Ref, Signals -- [sigusr1]);
+        {signal, Ref, #signalfd_siginfo{ssi_signo = ?SIGUSR2}} ->
+            signalfd_test_poll(Ref, Signals -- [sigusr2]);
+        Error ->
+            error_logger:error_report([{error, Error}])
+    end.
 
 as_int(Res) ->
     "\n" ++ N = lists:reverse(Res),

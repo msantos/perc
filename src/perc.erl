@@ -38,7 +38,8 @@
     setpriority/3,
 
     % Linux only
-    prlimit/4
+    prlimit/4,
+    signalfd/1, sigaddset/1, close/1
     ]).
 
 -on_load(on_load/0).
@@ -47,7 +48,11 @@
 on_load() ->
     erlang:load_nif(progname(), []).
 
-kill(_,_) ->
+kill(Pid, Signal) when is_integer(Signal) ->
+    kill_nif(Pid, Signal);
+kill(Pid, Signal) when is_atom(Signal) ->
+    kill_nif(Pid, perc_signal:define(Signal)).
+kill_nif(_,_) ->
     erlang:error(not_implemented).
 
 getpriority(_,_) ->
@@ -92,6 +97,24 @@ prlimit(Pid, Resource, New, Old) ->
     prlimit_nif(Pid, Resource, New, Old).
 
 prlimit_nif(_,_,_,_) ->
+    erlang:error(not_implemented).
+
+sigaddset(Signals) when is_list(Signals) ->
+    Signals1 = lists:map(
+            fun(N) when is_integer(N) -> N;
+               (N) when is_atom(N) ->
+                    perc_signal:define(N)
+            end,
+            Signals),
+    sigaddset_nif(Signals1).
+
+sigaddset_nif(_) ->
+    erlang:error(not_implemented).
+
+close(_) ->
+    erlang:error(not_implemented).
+
+signalfd(_) ->
     erlang:error(not_implemented).
 
 prio({pid, N}) ->
