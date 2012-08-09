@@ -38,6 +38,7 @@
     setpriority/3,
 
     % Linux only
+    prctl/3,
     prlimit/4,
     signalfd/1, signalfd/2,
     sigaddset/1, close/1
@@ -91,6 +92,9 @@ renice(Which, Who, Priority) when is_list(Priority) ->
     setpriority(Which, Who, list_to_integer(Priority));
 renice(Which, Who, Priority) when is_integer(Priority) ->
     setpriority(Which, Who, Priority).
+
+prctl(_,_,_) ->
+    erlang:error(not_implemented).
 
 prlimit(Pid, Resource, New, Old) when is_atom(Resource) ->
     prlimit(Pid, perc_rlimit:define(Resource), New, Old);

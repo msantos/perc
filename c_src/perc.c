@@ -42,6 +42,11 @@
 #include <sys/signalfd.h>
 #endif
 
+#ifdef HAVE_PRCTL
+#include <sys/prctl.h>
+#pragma message "Enabling support for prctl(2)"
+#endif
+
 #ifdef HAVE_PRLIMIT
 #pragma message "Enabling support for prlimit(2)"
 #endif
@@ -247,6 +252,33 @@ nif_close(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 #endif
 }
 
+    static ERL_NIF_TERM
+nif_prctl(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+#ifdef HAVE_PRCTL
+    int option = 0;
+    unsigned long arg2 = 0;
+    ErlNifBinary arg3 = {0};
+
+
+    if (!enif_get_int(env, argv[0], &option))
+        return enif_make_badarg(env);
+
+    if (!enif_get_ulong(env, argv[1], &arg2))
+        return enif_make_badarg(env);
+
+    if (!enif_inspect_binary(env, argv[2], &arg3))
+        return enif_make_badarg(env);
+
+    if (prctl(option, arg2, arg3.data) < 0)
+        return enif_make_tuple2(env, atom_error,
+            enif_make_atom(env, erl_errno_id(errno)));
+
+    return atom_ok;
+#else
+    return enif_make_tuple2(env, atom_error, atom_unsupported);
+#endif
+}
 
     static ERL_NIF_TERM
 nif_prlimit(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
@@ -296,6 +328,8 @@ static ErlNifFunc nif_funcs[] = {
     {"setpriority", 3, nif_setpriority},
 
     {"prlimit_nif", 4, nif_prlimit},
+
+    {"prctl", 3, nif_prctl},
 
     /* signal handling */
     {"close", 1, nif_close},
