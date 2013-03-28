@@ -34,10 +34,24 @@
 -include("perc_prctl.hrl").
 
 -export([
+    arch/0, arch/1,
     define/1,
     seccomp_data/1
     ]).
 
+arch() ->
+    case erlang:system_info(system_architecture) of
+        "x86_64" ++ _ ->
+            arch(x86_64);
+        "i386" ++ _ ->
+            arch(i386);
+        _ ->
+            {error, unsupported}
+    end.
+
+% linux/audit.h
+arch(x86_64) -> 16#C000003E;
+arch(ii386) -> 16#40000003.
 
 define(pr_get_seccomp) -> ?PR_GET_SECCOMP;
 define(pr_set_seccomp) -> ?PR_SET_SECCOMP.
