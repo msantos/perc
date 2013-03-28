@@ -101,21 +101,43 @@ perc is an Erlang interface for controlling Unix processes.
         composed of two 8 byte values in native format. To retrieve the
         current settings, pass in a zeroed 16 byte value.
 
+    getrlimit(Resource) -> {ok, Limit} | {error, Error}
+
+        Types Resource = integer() | rlimit()
+              Error = posix()
+
+        Get process limits for beam. See prlimit/4 for a list of the
+        resource atoms.
+
+        The value returned is a struct rlimit:
+
+            1> {ok, <<Soft:8/native-unsigned-integer-unit:8, Hard:8/native-unsigned-integer-unit:8>>} = perc:getrlimit(rlimit_nofile).
+            2> Soft.
+            1024
+            3> Hard.
+            4096
+
+    setrlimit(Resource, Limit) -> {ok, Limit} | {error, Error}
+
+        Types Resource = integer() | rlimit()
+              Error = posix()
+              Limit = binary()
+
+        Set process limits for beam. See prlimit/4 for a list of the
+        resource atoms.
+
+    umask() -> CurMask
     umask(Mask) -> OldMask
 
         Types   Mask = integer() | list()
-                OldMask = integer()
+                CurMask = OldMask = integer()
 
         Sets the file creation mask for beam. The mask may be either
         an integer or a list representing an octal number, e.g., either
         8#022 or "022".
 
         The old mask value is returned. To retrieve the current umask,
-        set a mask, then set it to the current value:
-
-            Mask = perc:umask(0),
-            perc:umask(Mask),
-            Mask.
+        use umask/0.
 
 
 ### perc_signal

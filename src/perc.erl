@@ -37,7 +37,10 @@
     getpriority/2,
     setpriority/3,
 
-    umask/1,
+    umask/0, umask/1,
+
+    getrlimit/1,
+    setrlimit/2,
 
     % Linux only
     prctl/3,
@@ -95,6 +98,11 @@ renice(Which, Who, Priority) when is_list(Priority) ->
 renice(Which, Who, Priority) when is_integer(Priority) ->
     setpriority(Which, Who, Priority).
 
+umask() ->
+    Mask = umask(0),
+    0 = umask(Mask),
+    Mask.
+
 umask(Mask) when is_list(Mask) ->
     umask(list_to_integer(Mask, 8));
 umask(Mask) when is_integer(Mask) ->
@@ -102,6 +110,27 @@ umask(Mask) when is_integer(Mask) ->
 
 umask_nif(_) ->
     erlang:error(not_implemented).
+
+getrlimit(Resource) when is_atom(Resource) ->
+    getrlimit(perc_rlimit:define(Resource));
+getrlimit(Resource) ->
+    % struct rlimit {
+    %   rlim_t rlim_cur;  /* Soft limit */
+    %   rlim_t rlim_max;  /* Hard limit (ceiling for rlim_cur) */
+    % };
+    getrlimit_nif(Resource, <<0:(16*8)>>).
+
+getrlimit_nif(_,_) ->
+    erlang:error(not_implemented).
+
+setrlimit(Resource, Limit) when is_atom(Resource) ->
+    setrlimit(perc_rlimit:define(Resource), Limit);
+setrlimit(Resource, Limit) ->
+    setrlimit_nif(Resource, Limit).
+
+setrlimit_nif(_,_) ->
+    erlang:error(not_implemented).
+
 
 prctl(_,_,_) ->
     erlang:error(not_implemented).

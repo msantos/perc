@@ -323,6 +323,48 @@ nif_prlimit(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
     static ERL_NIF_TERM
+nif_getrlimit(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    int resource = 0;
+    ErlNifBinary rlim = {0};
+
+
+    if (!enif_get_int(env, argv[0], &resource))
+        return enif_make_badarg(env);
+
+    if (!enif_inspect_binary(env, argv[1], &rlim) || rlim.size != sizeof(struct rlimit))
+        return enif_make_badarg(env);
+
+    if (getrlimit(resource, (struct rlimit *)rlim.data) != 0)
+        return enif_make_tuple2(env, atom_error,
+            enif_make_atom(env, erl_errno_id(errno)));
+
+    return enif_make_tuple2(env, atom_ok,
+            enif_make_binary(env, &rlim));
+}
+
+    static ERL_NIF_TERM
+nif_setrlimit(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    int resource = 0;
+    ErlNifBinary rlim = {0};
+
+
+    if (!enif_get_int(env, argv[0], &resource))
+        return enif_make_badarg(env);
+
+    if (!enif_inspect_binary(env, argv[1], &rlim) || rlim.size != sizeof(struct rlimit))
+        return enif_make_badarg(env);
+
+    if (setrlimit(resource, (struct rlimit *)rlim.data) != 0)
+        return enif_make_tuple2(env, atom_error,
+            enif_make_atom(env, erl_errno_id(errno)));
+
+    return enif_make_tuple2(env, atom_ok,
+            enif_make_binary(env, &rlim));
+}
+
+    static ERL_NIF_TERM
 nif_umask(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     u_int32_t mask = 0;
@@ -345,6 +387,8 @@ static ErlNifFunc nif_funcs[] = {
     {"setpriority", 3, nif_setpriority},
 
     {"prlimit_nif", 4, nif_prlimit},
+    {"getrlimit_nif", 2, nif_getrlimit},
+    {"setrlimit_nif", 2, nif_setrlimit},
 
     {"prctl", 3, nif_prctl},
 

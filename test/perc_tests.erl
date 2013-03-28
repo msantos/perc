@@ -33,6 +33,7 @@
 -compile(export_all).
 
 -include_lib("eunit/include/eunit.hrl").
+-include_lib("perc/include/perc.hrl").
 -include_lib("perc/include/perc_signal.hrl").
 
 -define(PRIO_PROCESS, perc_prio:define(prio_process)).
@@ -124,5 +125,20 @@ umask_test() ->
     0 = perc:umask(MaskStr),
     Mask = perc:umask(Mask),
     Mask = perc:umask(Cur),
+
+    ok.
+
+rlimit_test() ->
+    % Get the current soft and hard file descriptor limit for the process
+    {ok, <<?UINT64(_Soft), ?UINT64(Hard)>>} = perc:getrlimit(rlimit_nofile),
+
+    % Set the soft limit to the hard limit
+    Limit1 = <<?UINT64(Hard), ?UINT64(Hard)>>,
+    {ok, Limit1} = perc:setrlimit(rlimit_nofile, Limit1),
+
+    % Set the limits beyond the hard limit
+    Invalid = Hard * 2,
+    Limit2 = <<?UINT64(Invalid), ?UINT64(Invalid)>>,
+    {error, eperm} = perc:setrlimit(rlimit_nofile, Limit2),
 
     ok.
