@@ -103,6 +103,13 @@ perc is an Erlang interface for controlling Unix processes.
 
 ### perc_signal
 
+_WARNING: support for signalfd(2) is experimental only and is disabled by default._
+
+To enable, add `-DHAVE_SIGNALFD` to the rebar.config tuple for your
+architecture. Some of the signals may be caught by beam. signalfd is
+likely to work only with a single threaded beam. The interaction between
+signals and POSIX threads is mysterious.
+
         start(Signals) -> {ok, pid()} | {error, enomem}
 
             Types   Signals = [ Signal ]
