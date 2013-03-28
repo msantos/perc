@@ -115,3 +115,14 @@ signalfd_test_poll(Ref, Signals) ->
 as_int(Res) ->
     "\n" ++ N = lists:reverse(Res),
     list_to_integer(lists:reverse(N)).
+
+umask_test() ->
+    Mask = 8#077,
+    MaskStr = "077",
+
+    Cur = perc:umask(0),
+    0 = perc:umask(MaskStr),
+    Mask = perc:umask(Mask),
+    Mask = perc:umask(Cur),
+
+    ok.

@@ -106,13 +106,16 @@ perc is an Erlang interface for controlling Unix processes.
         Types   Mask = integer() | list()
                 OldMask = integer()
 
-        Sets the file creation mask for beam. The mask may be either an
-        integer or a list representing an octal number, e.g., "022".
+        Sets the file creation mask for beam. The mask may be either
+        an integer or a list representing an octal number, e.g., either
+        8#022 or "022".
 
-        The old mask value is returned. To retrieve the current umask
-        without altering it, pass in a value of 0 as the mask:
+        The old mask value is returned. To retrieve the current umask,
+        set a mask, then set it to the current value:
 
-            perc:umask(0)
+            Mask = perc:umask(0),
+            perc:umask(Mask),
+            Mask.
 
 
 ### perc_signal
