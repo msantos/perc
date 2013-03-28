@@ -275,7 +275,3 @@ signals and POSIX threads is mysterious.
 * process lookup
 
 * atom rlimit\_\* constants only supported for 64-bit values
-
-* Linux: add support for prctl(2)
-
-* add support for getrlimit(2)/setrlimit(2)
