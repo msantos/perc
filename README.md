@@ -101,6 +101,20 @@ perc is an Erlang interface for controlling Unix processes.
         composed of two 8 byte values in native format. To retrieve the
         current settings, pass in a zeroed 16 byte value.
 
+    umask(Mask) -> OldMask
+
+        Types   Mask = integer() | list()
+                OldMask = integer()
+
+        Sets the file creation mask for beam. The mask may be either an
+        integer or a list representing an octal number, e.g., "022".
+
+        The old mask value is returned. To retrieve the current umask
+        without altering it, pass in a value of 0 as the mask:
+
+            perc:umask(0)
+
+
 ### perc_signal
 
 _WARNING: support for signalfd(2) is experimental only and is disabled by default._

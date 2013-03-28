@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <signal.h>
 #include <errno.h>
@@ -321,6 +322,21 @@ nif_prlimit(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 #endif
 }
 
+    static ERL_NIF_TERM
+nif_umask(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    u_int32_t mask = 0;
+    u_int32_t omask = 0;
+
+
+    if (!enif_get_uint(env, argv[0], &mask))
+        return enif_make_badarg(env);
+
+    omask = umask(mask);
+
+    return enif_make_uint(env, omask);
+}
+
 
 static ErlNifFunc nif_funcs[] = {
     {"kill_nif", 2, nif_kill},
@@ -331,6 +347,8 @@ static ErlNifFunc nif_funcs[] = {
     {"prlimit_nif", 4, nif_prlimit},
 
     {"prctl", 3, nif_prctl},
+
+    {"umask_nif", 1, nif_umask},
 
     /* signal handling */
     {"close", 1, nif_close},

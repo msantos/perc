@@ -37,6 +37,8 @@
     getpriority/2,
     setpriority/3,
 
+    umask/1,
+
     % Linux only
     prctl/3,
     prlimit/4,
@@ -92,6 +94,14 @@ renice(Which, Who, Priority) when is_list(Priority) ->
     setpriority(Which, Who, list_to_integer(Priority));
 renice(Which, Who, Priority) when is_integer(Priority) ->
     setpriority(Which, Who, Priority).
+
+umask(Mask) when is_list(Mask) ->
+    umask(list_to_integer(Mask, 8));
+umask(Mask) when is_integer(Mask) ->
+    umask_nif(Mask).
+
+umask_nif(_) ->
+    erlang:error(not_implemented).
 
 prctl(_,_,_) ->
     erlang:error(not_implemented).
