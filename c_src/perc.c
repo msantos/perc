@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include <sys/types.h>
+#include <string.h>
 #include <signal.h>
 #include <errno.h>
 #include <unistd.h>
