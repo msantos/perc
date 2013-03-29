@@ -99,9 +99,32 @@ renice(Which, Who, Priority) when is_integer(Priority) ->
     setpriority(Which, Who, Priority).
 
 umask() ->
-    Mask = umask(0),
-    0 = umask(Mask),
-    Mask.
+    % Use process registration as a lock, to prevent a race condition
+    % in successive umasks.
+    %
+    % If more than one process sets the umask, it's possible that the
+    % process will be swapped out after the umask(0). This will leave beam
+    % with a umask of 0.
+    %
+    % There is a possible DoS if something else registers 'perc_umask'
+    % and never releases it.
+    %
+    % In the event something else changes the umask between calls,
+    % umask/0 will crash, releasing the lock.
+    %
+    % Probably simpler to add another NIF for umask/0 to make the
+    % sequence atomic.
+    try erlang:register(perc_umask, self()) of
+        true ->
+            Mask = umask(0),
+            0 = umask(Mask),
+            erlang:unregister(perc_umask),
+            Mask
+    catch
+        error:badarg ->
+            timer:sleep(1),
+            umask()
+    end.
 
 umask(Mask) when is_list(Mask) ->
     umask(list_to_integer(Mask, 8));

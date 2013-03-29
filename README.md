@@ -139,6 +139,25 @@ perc is an Erlang interface for controlling Unix processes.
         The old mask value is returned. To retrieve the current umask,
         use umask/0.
 
+        WARNING: querying the umask is destructive: it is done by
+        setting the umask to 0, then re-setting it back to the original
+        umask. Between successive calls to umask/1, the process may be
+        swapped out. If another process queries the umask, the beam Unix
+        process may end up in an inconsistent state.
+
+        To avoid this race condition, umask/0 sets a lock by using
+        process registration. This may have some unintended side effects:
+
+        1. If the atom is registered by something other than perc,
+           umask/0 will spin forever.
+
+        2. If, between successive calls to umask/1, something else
+           (another NIF or driver) changes the umask, umask/0 will crash,
+           releasing the lock.
+
+        Neither of the above is likely to happyen but at some point,
+        the umask/0 code may be moved into C to prevent these problems.
+
 
 ### perc_signal
 

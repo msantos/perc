@@ -128,6 +128,31 @@ umask_test() ->
 
     ok.
 
+umask_stress_test() ->
+    Self = self(),
+    N = 100,
+    [ spawn(fun() -> set_mask(Self, N) end) || _ <- lists:seq(1,100) ],
+
+    ok = umask_stress_test_1(N).
+
+umask_stress_test_1(0) ->
+    ok;
+umask_stress_test_1(N) ->
+    receive
+        ok -> umask_stress_test_1(N-1);
+        error -> umask_race
+    after
+        1000 -> timeout
+    end.
+
+set_mask(Pid, 0) ->
+    Pid ! ok;
+set_mask(Pid, N) ->
+    case perc:umask() of
+        0 -> Pid ! error;
+        _ -> set_mask(Pid, N-1)
+    end.
+
 rlimit_test() ->
     % Get the current soft and hard file descriptor limit for the process
     {ok, <<?UINT64(_Soft), ?UINT64(Hard)>>} = perc:getrlimit(rlimit_nofile),
