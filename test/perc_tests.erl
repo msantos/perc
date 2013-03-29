@@ -121,8 +121,8 @@ umask_test() ->
     Mask = 8#077,
     MaskStr = "077",
 
-    Cur = perc:umask(0),
-    0 = perc:umask(MaskStr),
+    Cur = perc:umask(),
+    Cur = perc:umask(MaskStr),
     Mask = perc:umask(Mask),
     Mask = perc:umask(Cur),
 
