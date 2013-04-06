@@ -141,7 +141,8 @@ getrlimit(Resource) ->
     %   rlim_t rlim_cur;  /* Soft limit */
     %   rlim_t rlim_max;  /* Hard limit (ceiling for rlim_cur) */
     % };
-    getrlimit_nif(Resource, <<0:(16*8)>>).
+    Size = erlang:system_info({wordsize, external}),
+    getrlimit_nif(Resource, <<0:(16*Size)>>).
 
 getrlimit_nif(_,_) ->
     erlang:error(not_implemented).

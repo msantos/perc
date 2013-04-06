@@ -33,10 +33,10 @@
 -compile(export_all).
 
 -include_lib("eunit/include/eunit.hrl").
--include_lib("perc/include/perc.hrl").
 -include_lib("perc/include/perc_signal.hrl").
 
 -define(PRIO_PROCESS, perc_prio:define(prio_process)).
+-define(UINT(N,S), N:S/native-unsigned-integer-unit:8).
 
 kill_test() ->
     Res = os:cmd("sleep 60 & echo $!"),
@@ -154,16 +154,18 @@ set_mask(Pid, N) ->
     end.
 
 rlimit_test() ->
+    Size = erlang:system_info({wordsize, external}),
+
     % Get the current soft and hard file descriptor limit for the process
-    {ok, <<?UINT64(_Soft), ?UINT64(Hard)>>} = perc:getrlimit(rlimit_nofile),
+    {ok, <<?UINT(_Soft, Size), ?UINT(Hard, Size)>>} = perc:getrlimit(rlimit_nofile),
 
     % Set the soft limit to the hard limit
-    Limit1 = <<?UINT64(Hard), ?UINT64(Hard)>>,
+    Limit1 = <<?UINT(Hard, Size), ?UINT(Hard, Size)>>,
     {ok, Limit1} = perc:setrlimit(rlimit_nofile, Limit1),
 
     % Set the limits beyond the hard limit
     Invalid = Hard * 2,
-    Limit2 = <<?UINT64(Invalid), ?UINT64(Invalid)>>,
+    Limit2 = <<?UINT(Invalid, Size), ?UINT(Invalid, Size)>>,
     {error, eperm} = perc:setrlimit(rlimit_nofile, Limit2),
 
     ok.
