@@ -60,13 +60,13 @@ kill(Pid, Signal) when is_integer(Signal) ->
 kill(Pid, Signal) when is_atom(Signal) ->
     kill_nif(Pid, perc_signal:define(Signal)).
 kill_nif(_,_) ->
-    erlang:error(not_implemented).
+    erlang:nif_error(not_implemented).
 
 getpriority(_,_) ->
-    erlang:error(not_implemented).
+    erlang:nif_error(not_implemented).
 
 setpriority(_,_,_) ->
-    erlang:error(not_implemented).
+    erlang:nif_error(not_implemented).
 
 renice(Type, Priority) ->
     {Which, Who} = prio(Type),
@@ -132,7 +132,7 @@ umask(Mask) when is_integer(Mask) ->
     umask_nif(Mask).
 
 umask_nif(_) ->
-    erlang:error(not_implemented).
+    erlang:nif_error(not_implemented).
 
 getrlimit(Resource) when is_atom(Resource) ->
     getrlimit(perc_rlimit:define(Resource));
@@ -145,7 +145,7 @@ getrlimit(Resource) ->
     getrlimit_nif(Resource, <<0:(16*Size)>>).
 
 getrlimit_nif(_,_) ->
-    erlang:error(not_implemented).
+    erlang:nif_error(not_implemented).
 
 setrlimit(Resource, Limit) when is_atom(Resource) ->
     setrlimit(perc_rlimit:define(Resource), Limit);
@@ -153,11 +153,11 @@ setrlimit(Resource, Limit) ->
     setrlimit_nif(Resource, Limit).
 
 setrlimit_nif(_,_) ->
-    erlang:error(not_implemented).
+    erlang:nif_error(not_implemented).
 
 
 prctl(_,_,_) ->
-    erlang:error(not_implemented).
+    erlang:nif_error(not_implemented).
 
 prlimit(Pid, Resource, New, Old) when is_atom(Resource) ->
     prlimit(Pid, perc_rlimit:define(Resource), New, Old);
@@ -165,7 +165,7 @@ prlimit(Pid, Resource, New, Old) ->
     prlimit_nif(Pid, Resource, New, Old).
 
 prlimit_nif(_,_,_,_) ->
-    erlang:error(not_implemented).
+    erlang:nif_error(not_implemented).
 
 sigaddset(Signals) when is_list(Signals) ->
     Signals1 = lists:map(
@@ -177,10 +177,10 @@ sigaddset(Signals) when is_list(Signals) ->
     sigaddset_nif(Signals1).
 
 sigaddset_nif(_) ->
-    erlang:error(not_implemented).
+    erlang:nif_error(not_implemented).
 
 close(_) ->
-    erlang:error(not_implemented).
+    erlang:nif_error(not_implemented).
 
 signalfd(Mask) ->
     signalfd(-1, Mask).
@@ -189,7 +189,7 @@ signalfd(Fd, Mask) ->
     signalfd_nif(Fd, Mask).
 
 signalfd_nif(_,_) ->
-    erlang:error(not_implemented).
+    erlang:nif_error(not_implemented).
 
 prio({pid, N}) ->
     {perc_prio:define(prio_process), N};
