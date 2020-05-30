@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2013, Michael Santos <michael.santos@gmail.com>
+/* Copyright (c) 2012-2020, Michael Santos <michael.santos@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,11 +82,6 @@ reload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
 upgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data, ERL_NIF_TERM load_info)
 {
     return 0;
-}
-
-    void
-unload(ErlNifEnv* env, void* priv_data)
-{
 }
 
     static ERL_NIF_TERM
@@ -400,4 +395,4 @@ static ErlNifFunc nif_funcs[] = {
     {"signalfd_nif", 2, nif_signalfd}
 };
 
-ERL_NIF_INIT(perc, nif_funcs, load, reload, upgrade, unload)
+ERL_NIF_INIT(perc, nif_funcs, load, reload, upgrade, NULL)
