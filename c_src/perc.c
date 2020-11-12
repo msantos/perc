@@ -58,14 +58,34 @@
 
 #include "erl_driver.h"
 
+typedef struct {
+  ErlNifMutex *lock;
+} PERC_PRIV;
+
 static ERL_NIF_TERM atom_ok;
 static ERL_NIF_TERM atom_error;
 static ERL_NIF_TERM atom_unsupported;
 
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
+  PERC_PRIV *priv = NULL;
+
   atom_ok = enif_make_atom(env, "ok");
   atom_error = enif_make_atom(env, "error");
   atom_unsupported = enif_make_atom(env, "unsupported");
+
+  priv = enif_alloc(sizeof(PERC_PRIV));
+  if (priv == NULL)
+    return -1;
+
+  (void)memset(priv, 0, sizeof(PERC_PRIV));
+
+  priv->lock = enif_mutex_create("perc_lock");
+  if (priv->lock == NULL) {
+    enif_free(priv);
+    return -1;
+  }
+
+  *priv_data = priv;
 
   return 0;
 }
@@ -336,8 +356,31 @@ static ERL_NIF_TERM nif_setrlimit(ErlNifEnv *env, int argc,
   return enif_make_tuple2(env, atom_ok, enif_make_binary(env, &rlim));
 }
 
-static ERL_NIF_TERM nif_umask(ErlNifEnv *env, int argc,
-                              const ERL_NIF_TERM argv[]) {
+static ERL_NIF_TERM nif_umask0(ErlNifEnv *env, int argc,
+                               const ERL_NIF_TERM argv[]) {
+  PERC_PRIV *priv;
+  u_int32_t mask;
+
+  priv = enif_priv_data(env);
+
+  enif_mutex_lock(priv->lock);
+  mask = umask(0);
+  (void)umask(mask);
+  enif_mutex_unlock(priv->lock);
+
+  return enif_make_uint(env, mask);
+}
+
+static void unload(ErlNifEnv *env, void *priv_data) {
+  PERC_PRIV *priv = priv_data;
+  if (priv) {
+    enif_mutex_destroy(priv->lock);
+    enif_free(priv);
+  }
+}
+
+static ERL_NIF_TERM nif_umask1(ErlNifEnv *env, int argc,
+                               const ERL_NIF_TERM argv[]) {
   u_int32_t mask = 0;
   u_int32_t omask = 0;
 
@@ -360,11 +403,12 @@ static ErlNifFunc nif_funcs[] = {{"kill_nif", 2, nif_kill},
 
                                  {"prctl", 3, nif_prctl},
 
-                                 {"umask_nif", 1, nif_umask},
+                                 {"umask_nif", 0, nif_umask0},
+                                 {"umask_nif", 1, nif_umask1},
 
                                  /* signal handling */
                                  {"close", 1, nif_close},
                                  {"sigaddset_nif", 1, nif_sigaddset},
                                  {"signalfd_nif", 2, nif_signalfd}};
 
-ERL_NIF_INIT(perc, nif_funcs, load, reload, upgrade, NULL)
+ERL_NIF_INIT(perc, nif_funcs, load, reload, upgrade, unload)
