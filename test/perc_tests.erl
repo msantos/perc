@@ -1,4 +1,4 @@
-%% Copyright (c) 2012-2013, Michael Santos <michael.santos@gmail.com>
+%% Copyright (c) 2012-2020, Michael Santos <michael.santos@gmail.com>
 %% All rights reserved.
 %%
 %% Redistribution and use in source and binary forms, with or without
@@ -127,6 +127,10 @@ umask_test() ->
     Mask = perc:umask(Cur),
 
     ok.
+
+getumask_test() ->
+    Mask = perc:umask(),
+    Mask = perc:getumask().
 
 umask_stress_test() ->
     Self = self(),

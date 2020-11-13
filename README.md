@@ -145,6 +145,16 @@ perc is an Erlang interface for controlling Unix processes.
         mask is 0. An erlang process calling umask/0 concurrently with
         a process creating a file may have unexpected results.
 
+    getumask() -> CurMask
+
+        Types   CurMask = OldMask = integer()
+
+        Obtain the current process mask by parsing /proc/self/status,
+        avoiding the race condition in umask/0.
+
+        If /proc/self/status does not exist or is not parsable, getumask/0
+        fails back to umask/0.
+
 ### perc_signal
 
 _WARNING: support for signalfd(2) is experimental only and is disabled by default._

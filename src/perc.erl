@@ -37,6 +37,9 @@
     setpriority/3,
 
     umask/0, umask/1,
+    getumask/0,
+
+    status/0,
 
     getrlimit/1,
     setrlimit/2,
@@ -96,6 +99,31 @@ renice(Which, Who, Priority) when is_list(Priority) ->
     setpriority(Which, Who, list_to_integer(Priority));
 renice(Which, Who, Priority) when is_integer(Priority) ->
     setpriority(Which, Who, Priority).
+
+status() ->
+  case file:read_file("/proc/self/status") of
+    {error, _} = Error ->
+      Error;
+    {ok, Status} ->
+      {ok, maps:from_list(
+        [ list_to_tuple(binary:split(N, <<":\t">>))
+          || N <- binary:split(Status, <<"\n">>, [global,trim]),
+             N /= <<>> ]
+       )}
+  end.
+
+getumask() ->
+  case status() of
+    {error, _} ->
+      umask();
+    {ok, Status} ->
+      case maps:find(<<"Umask">>, Status) of
+        error ->
+          umask();
+        {ok, Mask} ->
+          binary_to_integer(Mask, 8)
+      end
+  end.
 
 umask() ->
     umask_nif().
