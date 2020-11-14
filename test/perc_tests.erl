@@ -72,9 +72,11 @@ prio_test() ->
     % User may not be allowed to decrease process priority
     {ok, 15} = case perc:renice({pid, Pid}, "-5") of
         {ok, 5} ->
-            perc:renice({pid, Pid}, "+10");
+            ok = perc:renice({pid, Pid}, "+10"),
+            perc:getpriority(?PRIO_PROCESS, Pid);
         {error, eacces} ->
-            perc:renice({pid, Pid}, "+5")
+            ok = perc:renice({pid, Pid}, "+5"),
+            perc:getpriority(?PRIO_PROCESS, Pid)
     end,
 
     ok = perc:kill(Pid, 9).

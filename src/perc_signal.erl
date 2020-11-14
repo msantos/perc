@@ -107,7 +107,7 @@ handle_cast(_Msg, State) ->
 
 %% Signal received
 handle_info({Port, {data, Data}}, #state{port = Port, pid = Pid} = State) ->
-    [ Pid ! {signal, self(), signalfd_siginfo(Signal)} ||
+    _ = [ Pid ! {signal, self(), signalfd_siginfo(Signal)} ||
         <<Signal:128/binary>> <= Data ],
     {noreply, State};
 
@@ -118,7 +118,7 @@ handle_info(Info, State) ->
 
 terminate(_Reason, #state{fd = FD, port = Port}) ->
     catch erlang:port_close(Port),
-    perc:close(FD),
+    _ = perc:close(FD),
     ok.
 
 code_change(_OldVsn, State, _Extra) ->

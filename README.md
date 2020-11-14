@@ -12,11 +12,12 @@ perc is an Erlang interface for controlling Unix processes.
     kill(Pid, Signal) -> ok | {error, posix()}
     
         Types   Pid = integer()
-                Signal = integer()
+                Signal = integer() | atom()
 
         Send a signal to a Unix process.
 
-        Process IDs and signals are signed 32-bit integers.
+        Process IDs and signals are signed 32-bit integers. A signal
+        can also be the lower cased signal name as an atom.
 
         Sending a signal to PID 0 will send the signal to the Erlang VM.
 
@@ -41,13 +42,12 @@ perc is an Erlang interface for controlling Unix processes.
         Set the priority (the "nice" value) of processes by pid, process
         group or user.
 
-    renice(Type, Prio) -> {ok, NewPrio} | {error, posix()}
+    renice(Type, Prio) -> ok | {error, posix()}
 
         Types   Type = {Which, Who}
                 Which = pid | pgrp | user
                 Who = integer()
                 Prio = integer() | string()
-                NewPrio = integer()
 
         Convenience wrapper around getpriority/2 and setpriority/3,
         similar to renice(1).
@@ -57,10 +57,9 @@ perc is an Erlang interface for controlling Unix processes.
         may change between calls or the process may have been terminated.
 
         Sets the priority of a process or processes by pid, pgroup or
-        user and returns the new priority. The new priority may be an
-        integer or a list containing a relative priority, indicated by
-        using a "+" or "-". For example, using "+10" will increase the
-        niceness of the process by 10.
+        user. The new priority may be an integer or a list containing a
+        relative priority, indicated by using a "+" or "-". For example,
+        using "+10" will increase the niceness of the process by 10.
 
     prlimit(Pid, Resource, NewLimit, OldLimit) -> {ok, NewLimit1, OldLimit1} | {error, Error}
 

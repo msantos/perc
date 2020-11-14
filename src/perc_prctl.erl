@@ -50,7 +50,7 @@ arch() ->
 
 % linux/audit.h
 arch(x86_64) -> 16#C000003E;
-arch(ii386) -> 16#40000003.
+arch(i386) -> 16#40000003.
 
 define(pr_get_seccomp) -> ?PR_GET_SECCOMP;
 define(pr_set_seccomp) -> ?PR_SET_SECCOMP.
