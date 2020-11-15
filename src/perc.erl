@@ -1,6 +1,5 @@
-%%% Copyright (c) 2012-2020 Michael Santos <michael.santos@gmail.com>. All
-%%% rights reserved.
-%%%
+%%% @copyright 2012-2020 Michael Santos <michael.santos@gmail.com>
+
 %%% Redistribution and use in source and binary forms, with or without
 %%% modification, are permitted provided that the following conditions
 %%% are met:
@@ -108,6 +107,12 @@
 on_load() ->
     erlang:load_nif(progname(), []).
 
+%% @doc kill(2): send a signal to a Unix process
+%%
+%% Process IDs and signals are signed 32-bit integers. A signal
+%% can also be the lower cased signal name as an atom.
+%%
+%% Sending a signal to PID 0 will send the signal to the Erlang VM.
 -spec kill(pid_t(), atom() | integer()) -> ok | {error, posix()}.
 kill(Pid, Signal) when is_integer(Signal) ->
     kill_nif(Pid, Signal);
@@ -116,14 +121,35 @@ kill(Pid, Signal) when is_atom(Signal) ->
 kill_nif(_,_) ->
     erlang:nif_error(not_implemented).
 
+%% @doc getpriority(2): get the process priority
+%%
+%% Get the priority (the "nice" value) of processes by pid, process
+%% group or user.
 -spec getpriority(int32_t(), int32_t()) -> {ok, int32_t()} | {error, posix()}.
 getpriority(_,_) ->
     erlang:nif_error(not_implemented).
 
+%% @doc setpriority(2): set the process priority
+%%
+%% Set the priority (the "nice" value) of processes by pid, process
+%% group or user.
 -spec setpriority(int32_t(), int32_t(), int32_t()) -> ok | {error, posix()}.
 setpriority(_,_,_) ->
     erlang:nif_error(not_implemented).
 
+%% @doc renice: reset the process priority
+%%
+%% Convenience wrapper around getpriority/2 and setpriority/3,
+%% similar to renice(1).
+%%
+%% WARNING: renice/2 makes successive calls to getpriority/2 and
+%% setpriority/3. Since this sequence is not atomic, the priority
+%% may change between calls or the process may have been terminated.
+%%
+%% Sets the priority of a process or processes by pid, pgroup or
+%% user. The new priority may be an integer or a list containing a
+%% relative priority, indicated by using a "+" or "-". For example,
+%% using "+10" will increase the niceness of the process by 10.
 -spec renice(priority(), string() | int32_t()) -> ok | {error, posix()}.
 renice(Type, Priority) ->
     {Which, Who} = prio(Type),
@@ -151,6 +177,9 @@ renice(Which, Who, Priority) when is_list(Priority) ->
 renice(Which, Who, Priority) when is_integer(Priority) ->
     setpriority(Which, Who, Priority).
 
+%% @doc status: retrieve process status
+%%
+%% Reads /proc/self/status as a map.
 -spec status() -> {ok, #{binary() => binary()}} | {error, atom()}.
 status() ->
   case file:read_file("/proc/self/status") of
@@ -164,6 +193,13 @@ status() ->
        )}
   end.
 
+%% @doc getumask(3): safer version of umask/0
+%%
+%% Obtain the current process mask by parsing /proc/self/status,
+%% avoiding the race condition in umask/0.
+%%
+%% If /proc/self/status does not exist or is not parsable, getumask/0
+%% fails back to umask/0.
 -spec getumask() -> int32_t().
 getumask() ->
   case status() of
@@ -178,6 +214,13 @@ getumask() ->
       end
   end.
 
+%% @doc umask(2): get the process mask
+%%
+%% WARNING: umask/0 is destructive: the umask is retrieved by setting
+%% the process mask to 0, then re-setting it back to the original
+%% mask. Between the successive calls to umask(2), the process
+%% mask is 0. An erlang process calling umask/0 concurrently with
+%% a process creating a file may have unexpected results.
 -spec umask() -> int32_t().
 umask() ->
     umask_nif().
@@ -185,6 +228,14 @@ umask() ->
 umask_nif() ->
     erlang:nif_error(not_implemented).
 
+%% @doc umask(2): set the process mask
+%%
+%% Sets the file creation mask for beam. The mask may be either
+%% an integer or a list representing an octal number, e.g., either
+%% 8#022 or "022".
+%%
+%% The old mask value is returned. To retrieve the current umask,
+%% use umask/0 or getumask/0.
 -spec umask(string() | int32_t()) -> int32_t().
 umask(Mask) when is_list(Mask) ->
     umask(list_to_integer(Mask, 8));
@@ -194,6 +245,20 @@ umask(Mask) when is_integer(Mask) ->
 umask_nif(_) ->
     erlang:nif_error(not_implemented).
 
+%% @doc getrlimit(2): get process resource limits
+%%
+%% Get process limits for beam. See prlimit/4 for a list of the
+%% resource atoms.
+%%
+%% The value returned is a struct rlimit:
+%%
+%% ```
+%% 1> {ok, <<Soft:8/native-unsigned-integer-unit:8, Hard:8/native-unsigned-integer-unit:8>>} = perc:getrlimit(rlimit_nofile).
+%% 2> Soft.
+%% 1024
+%% 3> Hard.
+%% 4096
+%% '''
 -spec getrlimit(atom() | int32_t()) -> {ok, binary()} | {error, posix()}.
 getrlimit(Resource) when is_atom(Resource) ->
     getrlimit(perc_rlimit:define(Resource));
@@ -208,6 +273,10 @@ getrlimit(Resource) ->
 getrlimit_nif(_,_) ->
     erlang:nif_error(not_implemented).
 
+%% @doc setrlimit(2): set process resource limits
+%%
+%% Set process limits for beam. See prlimit/4 for a list of the
+%% resource atoms.
 -spec setrlimit(atom() | int32_t(), atom() | int32_t()) -> {ok, binary()} | {error, posix()}.
 setrlimit(Resource, Limit) when is_atom(Resource) ->
     setrlimit(perc_rlimit:define(Resource), Limit);
@@ -222,6 +291,19 @@ setrlimit_nif(_,_) ->
 prctl(_,_,_) ->
     erlang:nif_error(not_implemented).
 
+%% @doc prlimit(2): set resource limits for a specified process
+%%
+%% Linux only: on other platforms, {error, unsupported} will be
+%% returned to the caller.
+%%
+%% Set or retrieve process limits for a process. Passing in an
+%% empty binary for NewLimit or OldLimit indicates the caller is
+%% not interested in these values.
+%%
+%% The binary size of NewLimit/OldLimit must otherwise match the size
+%% of a struct rlimit for the platform. struct rlimit is usually
+%% composed of two 8 byte values in native format. To retrieve the
+%% current settings, pass in a zeroed 16 byte value.
 -spec prlimit(pid_t(), atom() | int32_t(), binary(), binary()) -> {ok, binary(), binary()} | {error, posix()}.
 prlimit(Pid, Resource, New, Old) when is_atom(Resource) ->
     prlimit(Pid, perc_rlimit:define(Resource), New, Old);

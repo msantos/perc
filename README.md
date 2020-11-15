@@ -136,7 +136,7 @@ perc is an Erlang interface for controlling Unix processes.
         8#022 or "022".
 
         The old mask value is returned. To retrieve the current umask,
-        use umask/0.
+        use umask/0 or getumask/0.
 
         WARNING: umask/0 is destructive: the umask is retrieved by setting
         the process mask to 0, then re-setting it back to the original
