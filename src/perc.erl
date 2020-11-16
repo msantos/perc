@@ -47,59 +47,167 @@
     prctl/3,
     prlimit/4,
     signalfd/1, signalfd/2,
-    sigaddset/1, close/1
-    ]).
+    sigaddset/1,
+    close/1
+]).
 
 -export_type([
-              int32_t/0,
-              pid_t/0,
-              posix/0,
-              priority/0,
-              uint32_t/0,
-              uint64_t/0
-             ]).
+    int32_t/0,
+    pid_t/0,
+    posix/0,
+    priority/0,
+    uint32_t/0,
+    uint64_t/0
+]).
 
--type posix() :: 'e2big'
-    | 'eacces' | 'eaddrinuse' | 'eaddrnotavail' | 'eadv' | 'eafnosupport'
-    | 'eagain' | 'ealign' | 'ealready'
-    | 'ebade' | 'ebadf' | 'ebadfd' | 'ebadmsg' | 'ebadr' | 'ebadrpc'
-    | 'ebadrqc' | 'ebadslt' | 'ebfont' | 'ebusy'
-    | 'ecapmode' | 'echild' | 'echrng' | 'ecomm' | 'econnaborted'
-    | 'econnrefused' | 'econnreset'
-    | 'edeadlk' | 'edeadlock' | 'edestaddrreq' | 'edirty' | 'edom' | 'edotdot'
-    | 'edquot' | 'eduppkg'
+-type posix() ::
+    'e2big'
+    | 'eacces'
+    | 'eaddrinuse'
+    | 'eaddrnotavail'
+    | 'eadv'
+    | 'eafnosupport'
+    | 'eagain'
+    | 'ealign'
+    | 'ealready'
+    | 'ebade'
+    | 'ebadf'
+    | 'ebadfd'
+    | 'ebadmsg'
+    | 'ebadr'
+    | 'ebadrpc'
+    | 'ebadrqc'
+    | 'ebadslt'
+    | 'ebfont'
+    | 'ebusy'
+    | 'ecapmode'
+    | 'echild'
+    | 'echrng'
+    | 'ecomm'
+    | 'econnaborted'
+    | 'econnrefused'
+    | 'econnreset'
+    | 'edeadlk'
+    | 'edeadlock'
+    | 'edestaddrreq'
+    | 'edirty'
+    | 'edom'
+    | 'edotdot'
+    | 'edquot'
+    | 'eduppkg'
     | 'eexist'
-    | 'efault' | 'efbig'
-    | 'ehostdown' | 'ehostunreach'
-    | 'eidrm' | 'einit' | 'einprogress' | 'eintr' | 'einval' | 'eio'
-    | 'eisconn' | 'eisdir' | 'eisnam'
-    | 'el2hlt' | 'el2nsync' | 'el3hlt' | 'el3rst' | 'elbin' | 'elibacc'
-    | 'elibbad' | 'elibexec' | 'elibmax' | 'elibscn' | 'elnrng' | 'eloop'
-    | 'emfile' | 'emlink' | 'emsgsize' | 'emultihop'
-    | 'enametoolong' | 'enavail' | 'enet' | 'enetdown' | 'enetreset'
-    | 'enetunreach' | 'enfile' | 'enoano' | 'enobufs' | 'enocsi' | 'enodata'
-    | 'enodev' | 'enoent' | 'enoexec' | 'enolck' | 'enolink' | 'enomem'
-    | 'enomsg' | 'enonet' | 'enopkg' | 'enoprotoopt' | 'enospc' | 'enosr'
-    | 'enostr' | 'enosym' | 'enosys' | 'enotblk' | 'enotcapable' | 'enotconn'
-    | 'enotdir' | 'enotempty' | 'enotnam' | 'enotrecoverable' | 'enotsock'
-    | 'enotsup' | 'enotty' | 'enotuniq' | 'enxio' | 'eopnotsupp'
-    | 'eoverflow' | 'eownerdead'
-    | 'eperm' | 'epfnosupport' | 'epipe' | 'eproclim' | 'eprocunavail'
-    | 'eprogmismatch' | 'eprogunavail' | 'eproto' | 'eprotonosupport'
+    | 'efault'
+    | 'efbig'
+    | 'ehostdown'
+    | 'ehostunreach'
+    | 'eidrm'
+    | 'einit'
+    | 'einprogress'
+    | 'eintr'
+    | 'einval'
+    | 'eio'
+    | 'eisconn'
+    | 'eisdir'
+    | 'eisnam'
+    | 'el2hlt'
+    | 'el2nsync'
+    | 'el3hlt'
+    | 'el3rst'
+    | 'elbin'
+    | 'elibacc'
+    | 'elibbad'
+    | 'elibexec'
+    | 'elibmax'
+    | 'elibscn'
+    | 'elnrng'
+    | 'eloop'
+    | 'emfile'
+    | 'emlink'
+    | 'emsgsize'
+    | 'emultihop'
+    | 'enametoolong'
+    | 'enavail'
+    | 'enet'
+    | 'enetdown'
+    | 'enetreset'
+    | 'enetunreach'
+    | 'enfile'
+    | 'enoano'
+    | 'enobufs'
+    | 'enocsi'
+    | 'enodata'
+    | 'enodev'
+    | 'enoent'
+    | 'enoexec'
+    | 'enolck'
+    | 'enolink'
+    | 'enomem'
+    | 'enomsg'
+    | 'enonet'
+    | 'enopkg'
+    | 'enoprotoopt'
+    | 'enospc'
+    | 'enosr'
+    | 'enostr'
+    | 'enosym'
+    | 'enosys'
+    | 'enotblk'
+    | 'enotcapable'
+    | 'enotconn'
+    | 'enotdir'
+    | 'enotempty'
+    | 'enotnam'
+    | 'enotrecoverable'
+    | 'enotsock'
+    | 'enotsup'
+    | 'enotty'
+    | 'enotuniq'
+    | 'enxio'
+    | 'eopnotsupp'
+    | 'eoverflow'
+    | 'eownerdead'
+    | 'eperm'
+    | 'epfnosupport'
+    | 'epipe'
+    | 'eproclim'
+    | 'eprocunavail'
+    | 'eprogmismatch'
+    | 'eprogunavail'
+    | 'eproto'
+    | 'eprotonosupport'
     | 'eprototype'
-    | 'erange' | 'erefused' | 'eremchg' | 'eremdev' | 'eremote' | 'eremoteio'
-    | 'eremoterelease' | 'erofs' | 'erpcmismatch' | 'erremote'
-    | 'eshutdown' | 'esocktnosupport' | 'espipe' | 'esrch' | 'esrmnt'
-    | 'estale' | 'esuccess'
-    | 'etime' | 'etimedout' | 'etoomanyrefs' | 'etxtbsy'
-    | 'euclean' | 'eunatch' | 'eusers'
+    | 'erange'
+    | 'erefused'
+    | 'eremchg'
+    | 'eremdev'
+    | 'eremote'
+    | 'eremoteio'
+    | 'eremoterelease'
+    | 'erofs'
+    | 'erpcmismatch'
+    | 'erremote'
+    | 'eshutdown'
+    | 'esocktnosupport'
+    | 'espipe'
+    | 'esrch'
+    | 'esrmnt'
+    | 'estale'
+    | 'esuccess'
+    | 'etime'
+    | 'etimedout'
+    | 'etoomanyrefs'
+    | 'etxtbsy'
+    | 'euclean'
+    | 'eunatch'
+    | 'eusers'
     | 'eversion'
     | 'ewouldblock'
-    | 'exdev' | 'exfull'.
+    | 'exdev'
+    | 'exfull'.
 
--type int32_t() :: -16#7fffffff .. 16#7fffffff.
--type uint32_t() :: 0 .. 16#ffffffff.
--type uint64_t() :: 0 .. 16#ffffffffffffffff.
+-type int32_t() :: -16#7fffffff..16#7fffffff.
+-type uint32_t() :: 0..16#ffffffff.
+-type uint64_t() :: 0..16#ffffffffffffffff.
 -type pid_t() :: int32_t().
 
 -on_load(on_load/0).
@@ -118,7 +226,8 @@ kill(Pid, Signal) when is_integer(Signal) ->
     kill_nif(Pid, Signal);
 kill(Pid, Signal) when is_atom(Signal) ->
     kill_nif(Pid, perc_signal:define(Signal)).
-kill_nif(_,_) ->
+
+kill_nif(_, _) ->
     erlang:nif_error(not_implemented).
 
 %% @doc getpriority(2): get the process priority
@@ -126,7 +235,7 @@ kill_nif(_,_) ->
 %% Get the priority (the "nice" value) of processes by pid, process
 %% group or user.
 -spec getpriority(int32_t(), int32_t()) -> {ok, int32_t()} | {error, posix()}.
-getpriority(_,_) ->
+getpriority(_, _) ->
     erlang:nif_error(not_implemented).
 
 %% @doc setpriority(2): set the process priority
@@ -134,7 +243,7 @@ getpriority(_,_) ->
 %% Set the priority (the "nice" value) of processes by pid, process
 %% group or user.
 -spec setpriority(int32_t(), int32_t(), int32_t()) -> ok | {error, posix()}.
-setpriority(_,_,_) ->
+setpriority(_, _, _) ->
     erlang:nif_error(not_implemented).
 
 %% @doc renice: reset the process priority
@@ -182,16 +291,19 @@ renice(Which, Who, Priority) when is_integer(Priority) ->
 %% Reads /proc/self/status as a map.
 -spec status() -> {ok, #{binary() => binary()}} | {error, atom()}.
 status() ->
-  case file:read_file("/proc/self/status") of
-    {error, _} = Error ->
-      Error;
-    {ok, Status} ->
-      {ok, maps:from_list(
-        [ list_to_tuple(binary:split(N, <<":\t">>))
-          || N <- binary:split(Status, <<"\n">>, [global,trim]),
-             N /= <<>> ]
-       )}
-  end.
+    case file:read_file("/proc/self/status") of
+        {error, _} = Error ->
+            Error;
+        {ok, Status} ->
+            {ok,
+                maps:from_list(
+                    [
+                        list_to_tuple(binary:split(N, <<":\t">>))
+                        || N <- binary:split(Status, <<"\n">>, [global, trim]),
+                           N /= <<>>
+                    ]
+                )}
+    end.
 
 %% @doc getumask(3): safer version of umask/0
 %%
@@ -202,17 +314,17 @@ status() ->
 %% fails back to umask/0.
 -spec getumask() -> int32_t().
 getumask() ->
-  case status() of
-    {error, _} ->
-      umask();
-    {ok, Status} ->
-      case maps:find(<<"Umask">>, Status) of
-        error ->
-          umask();
-        {ok, Mask} ->
-          binary_to_integer(Mask, 8)
-      end
-  end.
+    case status() of
+        {error, _} ->
+            umask();
+        {ok, Status} ->
+            case maps:find(<<"Umask">>, Status) of
+                error ->
+                    umask();
+                {ok, Mask} ->
+                    binary_to_integer(Mask, 8)
+            end
+    end.
 
 %% @doc umask(2): get the process mask
 %%
@@ -268,9 +380,9 @@ getrlimit(Resource) ->
     %   rlim_t rlim_max;  /* Hard limit (ceiling for rlim_cur) */
     % };
     Size = erlang:system_info({wordsize, external}),
-    getrlimit_nif(Resource, <<0:(16*Size)>>).
+    getrlimit_nif(Resource, <<0:(16 * Size)>>).
 
-getrlimit_nif(_,_) ->
+getrlimit_nif(_, _) ->
     erlang:nif_error(not_implemented).
 
 %% @doc setrlimit(2): set process resource limits
@@ -283,12 +395,11 @@ setrlimit(Resource, Limit) when is_atom(Resource) ->
 setrlimit(Resource, Limit) ->
     setrlimit_nif(Resource, Limit).
 
-setrlimit_nif(_,_) ->
+setrlimit_nif(_, _) ->
     erlang:nif_error(not_implemented).
 
-
 -spec prctl(int32_t(), uint32_t() | uint64_t(), binary()) -> ok | {error, posix()}.
-prctl(_,_,_) ->
+prctl(_, _, _) ->
     erlang:nif_error(not_implemented).
 
 %% @doc prlimit(2): set resource limits for a specified process
@@ -304,23 +415,27 @@ prctl(_,_,_) ->
 %% of a struct rlimit for the platform. struct rlimit is usually
 %% composed of two 8 byte values in native format. To retrieve the
 %% current settings, pass in a zeroed 16 byte value.
--spec prlimit(pid_t(), atom() | int32_t(), binary(), binary()) -> {ok, binary(), binary()} | {error, posix()}.
+-spec prlimit(pid_t(), atom() | int32_t(), binary(), binary()) ->
+    {ok, binary(), binary()} | {error, posix()}.
 prlimit(Pid, Resource, New, Old) when is_atom(Resource) ->
     prlimit(Pid, perc_rlimit:define(Resource), New, Old);
 prlimit(Pid, Resource, New, Old) ->
     prlimit_nif(Pid, Resource, New, Old).
 
-prlimit_nif(_,_,_,_) ->
+prlimit_nif(_, _, _, _) ->
     erlang:nif_error(not_implemented).
 
 -spec sigaddset([atom() | int32_t()]) -> {ok, binary()} | {error, posix()}.
 sigaddset(Signals) when is_list(Signals) ->
     Signals1 = lists:map(
-            fun(N) when is_integer(N) -> N;
-               (N) when is_atom(N) ->
-                    perc_signal:define(N)
-            end,
-            Signals),
+        fun
+            (N) when is_integer(N) ->
+                N;
+            (N) when is_atom(N) ->
+                perc_signal:define(N)
+        end,
+        Signals
+    ),
     sigaddset_nif(Signals1).
 
 sigaddset_nif(_) ->
@@ -338,13 +453,14 @@ signalfd(Mask) ->
 signalfd(Fd, Mask) ->
     signalfd_nif(Fd, Mask).
 
-signalfd_nif(_,_) ->
+signalfd_nif(_, _) ->
     erlang:nif_error(not_implemented).
 
--type priority() :: int32_t()
-  | {pid, int32_t()}
-  | {pgrp, int32_t()}
-  | {user, int32_t()}.
+-type priority() ::
+    int32_t()
+    | {pid, int32_t()}
+    | {pgrp, int32_t()}
+    | {user, int32_t()}.
 
 -spec prio(priority()) -> {int32_t(), int32_t()}.
 prio({pid, N}) ->
@@ -359,13 +475,13 @@ prio(N) when is_integer(N) ->
 -spec progname() -> binary() | string().
 progname() ->
     case code:priv_dir(?MODULE) of
-        {error,bad_name} ->
+        {error, bad_name} ->
             filename:join([
                 filename:dirname(code:which(?MODULE)),
-                    "..",
-                    "priv",
-                    ?MODULE
-                ]);
+                "..",
+                "priv",
+                ?MODULE
+            ]);
         Dir ->
-            filename:join([Dir,?MODULE])
+            filename:join([Dir, ?MODULE])
     end.

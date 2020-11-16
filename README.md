@@ -2,8 +2,7 @@ perc is an Erlang interface for controlling Unix processes.
 
 ## COMPILING
 
-    make
-
+    rebar3 do compile, eunit
 
 ## EXPORTS
 

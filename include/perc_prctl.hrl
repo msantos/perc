@@ -31,15 +31,23 @@
 -define(PR_GET_SECCOMP, 21).
 -define(PR_SET_SECCOMP, 22).
 
--define(SECCOMP_MODE_DISABLED, 0).          % seccomp is not in use
--define(SECCOMP_MODE_STRICT, 1).            % uses hard-coded filter
--define(SECCOMP_MODE_FILTER, 2).            % uses user-supplied filter
+% seccomp is not in use
+-define(SECCOMP_MODE_DISABLED, 0).
+% uses hard-coded filter
+-define(SECCOMP_MODE_STRICT, 1).
+% uses user-supplied filter
+-define(SECCOMP_MODE_FILTER, 2).
 
--define(SECCOMP_RET_KILL, 16#00000000).     % kill the task immediately
--define(SECCOMP_RET_TRAP, 16#00030000).     % disallow and force a SIGSYS
--define(SECCOMP_RET_ERRNO, 16#00050000).    % returns an errno
--define(SECCOMP_RET_TRACE, 16#7ff00000).    % pass to a tracer or disallow
--define(SECCOMP_RET_ALLOW, 16#7fff0000).    % allow
+% kill the task immediately
+-define(SECCOMP_RET_KILL, 16#00000000).
+% disallow and force a SIGSYS
+-define(SECCOMP_RET_TRAP, 16#00030000).
+% returns an errno
+-define(SECCOMP_RET_ERRNO, 16#00050000).
+% pass to a tracer or disallow
+-define(SECCOMP_RET_TRACE, 16#7ff00000).
+% allow
+-define(SECCOMP_RET_ALLOW, 16#7fff0000).
 
 -define(SECCOMP_RET_ACTION, 16#ffff0000).
 -define(SECCOMP_RET_DATA, 16#0000ffff).
@@ -48,5 +56,5 @@
     nr = 0,
     arch = 0,
     instruction_pointer = 0,
-    args = <<0:(64*6)>>
+    args = <<0:(64 * 6)>>
 }).

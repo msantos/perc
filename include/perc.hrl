@@ -28,7 +28,7 @@
 %% LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 %% ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 %% POSSIBILITY OF SUCH DAMAGE.
--define(INT32(N), N:4/native-signed-integer-unit:8).
--define(UINT32(N), N:4/native-unsigned-integer-unit:8).
--define(INT64(N), N:8/native-signed-integer-unit:8).
--define(UINT64(N), N:8/native-unsigned-integer-unit:8).
+-define(INT32(N), N:4 / native - signed - integer - unit:8).
+-define(UINT32(N), N:4 / native - unsigned - integer - unit:8).
+-define(INT64(N), N:8 / native - signed - integer - unit:8).
+-define(UINT64(N), N:8 / native - unsigned - integer - unit:8).

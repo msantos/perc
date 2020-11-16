@@ -27,6 +27,7 @@
 %%% NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 %%% SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -module(perc_signal).
+
 -behaviour(gen_server).
 
 -include_lib("perc/include/perc.hrl").
@@ -35,24 +36,30 @@
 -export([
     define/1,
     signalfd_siginfo/1
-    ]).
+]).
+
 -export([
     start/1,
     stop/1,
     getfd/1,
 
     start_link/1
-    ]).
--export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-    terminate/2, code_change/3]).
+]).
+
+-export([
+    init/1,
+    handle_call/3,
+    handle_cast/2,
+    handle_info/2,
+    terminate/2,
+    code_change/3
+]).
 
 -record(state, {
-        port,
-        pid,
-        fd
-        }).
-
-
+    port,
+    pid,
+    fd
+}).
 
 %%--------------------------------------------------------------------
 %%% Exports
@@ -75,7 +82,6 @@ start_link(Signals) when is_list(Signals) ->
             Err
     end.
 
-
 %%--------------------------------------------------------------------
 %%% Callbacks
 %%--------------------------------------------------------------------
@@ -94,10 +100,8 @@ init([Pid, Mask]) ->
             Err
     end.
 
-
 handle_call(getfd, _From, #state{fd = FD} = State) ->
     {reply, FD, State};
-
 handle_call(stop, _From, State) ->
     {stop, normal, ok, State}.
 
@@ -106,10 +110,11 @@ handle_cast(_Msg, State) ->
 
 %% Signal received
 handle_info({Port, {data, Data}}, #state{port = Port, pid = Pid} = State) ->
-    _ = [ Pid ! {signal, self(), signalfd_siginfo(Signal)} ||
-        <<Signal:128/binary>> <= Data ],
+    _ = [
+        Pid ! {signal, self(), signalfd_siginfo(Signal)}
+        || <<Signal:128/binary>> <= Data
+    ],
     {noreply, State};
-
 % WTF?
 handle_info(Info, State) ->
     error_logger:error_report([wtf, Info]),
@@ -128,59 +133,78 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 
 % Signal definitions: linux
-define(sighup) ->  1;
-define(sigint) ->  2;
-define(sigquit) ->  3;
-define(sigill) ->  4;
-define(sigtrap) ->  5;
-define(sigabrt) ->  6;
-define(sigbus) ->  7;
-define(sigfpe) ->  8;
-define(sigkill) ->  9;
-define(sigusr1) ->  10;
-define(sigsegv) ->  11;
-define(sigusr2) ->  12;
-define(sigpipe) ->  13;
-define(sigalrm) ->  14;
-define(sigterm) ->  15;
-define(sigstkflt) ->  16;
-define(sigchld) ->  17;
-define(sigcont) ->  18;
-define(sigstop) ->  19;
-define(sigtstp) ->  20;
-define(sigttin) ->  21;
-define(sigttou) ->  22;
-define(sigurg) ->  23;
-define(sigxcpu) ->  24;
-define(sigxfsz) ->  25;
-define(sigvtalrm) ->  26;
-define(sigprof) ->  27;
-define(sigwinch) ->  28;
-define(sigio) ->  29;
-define(sigpwr) ->  30;
-define(sigsys) ->  31;
-define(sigrtmin) ->  34;
-define(sigrtmax) ->  64.
+define(sighup) -> 1;
+define(sigint) -> 2;
+define(sigquit) -> 3;
+define(sigill) -> 4;
+define(sigtrap) -> 5;
+define(sigabrt) -> 6;
+define(sigbus) -> 7;
+define(sigfpe) -> 8;
+define(sigkill) -> 9;
+define(sigusr1) -> 10;
+define(sigsegv) -> 11;
+define(sigusr2) -> 12;
+define(sigpipe) -> 13;
+define(sigalrm) -> 14;
+define(sigterm) -> 15;
+define(sigstkflt) -> 16;
+define(sigchld) -> 17;
+define(sigcont) -> 18;
+define(sigstop) -> 19;
+define(sigtstp) -> 20;
+define(sigttin) -> 21;
+define(sigttou) -> 22;
+define(sigurg) -> 23;
+define(sigxcpu) -> 24;
+define(sigxfsz) -> 25;
+define(sigvtalrm) -> 26;
+define(sigprof) -> 27;
+define(sigwinch) -> 28;
+define(sigio) -> 29;
+define(sigpwr) -> 30;
+define(sigsys) -> 31;
+define(sigrtmin) -> 34;
+define(sigrtmax) -> 64.
 
-signalfd_siginfo(<<
-        ?UINT32(Signo),     % Signal number
-        ?INT32(Errno),      % Error number (unused)
-        ?INT32(Code),       % Signal code
-        ?UINT32(Pid),       % PID of sender
-        ?UINT32(Uid),       % Real UID of sender
-        ?INT32(Fd),         % File descriptor (SIGIO)
-        ?UINT32(Tid),       % Kernel timer ID (POSIX timers)
-        ?UINT32(Band),      % Band event (SIGIO)
-        ?UINT32(Overrun),   % POSIX timer overrun count
-        ?UINT32(Trapno),    % Trap number that caused signal
-        ?INT32(Status),     % Exit status or signal (SIGCHLD)
-        ?INT32(Int),        % Integer sent by sigqueue(2)
-        ?UINT64(Ptr),       % Pointer sent by sigqueue(2)
-        ?UINT64(Utime),     % User CPU time consumed (SIGCHLD)
-        ?UINT64(Stime),     % System CPU time consumed (SIGCHLD)
-        ?UINT64(Addr),      % Address that generated signal (for hardware-generated signals)
-        Pad/binary          % Pad size to 128 bytes (allow for additional fields in the future)
-    >> = Data) when byte_size(Data) =:= 128 ->
+signalfd_siginfo(
+    <<
+        % Signal number
+        ?UINT32(Signo),
+        % Error number (unused)
+        ?INT32(Errno),
+        % Signal code
+        ?INT32(Code),
+        % PID of sender
+        ?UINT32(Pid),
+        % Real UID of sender
+        ?UINT32(Uid),
+        % File descriptor (SIGIO)
+        ?INT32(Fd),
+        % Kernel timer ID (POSIX timers)
+        ?UINT32(Tid),
+        % Band event (SIGIO)
+        ?UINT32(Band),
+        % POSIX timer overrun count
+        ?UINT32(Overrun),
+        % Trap number that caused signal
+        ?UINT32(Trapno),
+        % Exit status or signal (SIGCHLD)
+        ?INT32(Status),
+        % Integer sent by sigqueue(2)
+        ?INT32(Int),
+        % Pointer sent by sigqueue(2)
+        ?UINT64(Ptr),
+        % User CPU time consumed (SIGCHLD)
+        ?UINT64(Utime),
+        % System CPU time consumed (SIGCHLD)
+        ?UINT64(Stime),
+        % Address that generated signal (for hardware-generated signals)
+        ?UINT64(Addr),
+        % Pad size to 128 bytes (allow for additional fields in the future)
+        Pad/binary
+    >> = Data
+) when byte_size(Data) =:= 128 ->
     #signalfd_siginfo{
         ssi_signo = Signo,
         ssi_errno = Errno,
@@ -199,46 +223,62 @@ signalfd_siginfo(<<
         ssi_stime = Stime,
         ssi_addr = Addr,
         pad = Pad
-        };
+    };
 signalfd_siginfo(#signalfd_siginfo{
-        ssi_signo = Signo,
-        ssi_errno = Errno,
-        ssi_code = Code,
-        ssi_pid = Pid,
-        ssi_uid = Uid,
-        ssi_fd = Fd,
-        ssi_tid = Tid,
-        ssi_band = Band,
-        ssi_overrun = Overrun,
-        ssi_trapno = Trapno,
-        ssi_status = Status,
-        ssi_int = Int,
-        ssi_ptr = Ptr,
-        ssi_utime = Utime,
-        ssi_stime = Stime,
-        ssi_addr = Addr,
-        pad = Pad
-    }) ->
+    ssi_signo = Signo,
+    ssi_errno = Errno,
+    ssi_code = Code,
+    ssi_pid = Pid,
+    ssi_uid = Uid,
+    ssi_fd = Fd,
+    ssi_tid = Tid,
+    ssi_band = Band,
+    ssi_overrun = Overrun,
+    ssi_trapno = Trapno,
+    ssi_status = Status,
+    ssi_int = Int,
+    ssi_ptr = Ptr,
+    ssi_utime = Utime,
+    ssi_stime = Stime,
+    ssi_addr = Addr,
+    pad = Pad
+}) ->
     <<
-        ?UINT32(Signo),     % Signal number
-        ?INT32(Errno),      % Error number (unused)
-        ?INT32(Code),       % Signal code
-        ?UINT32(Pid),       % PID of sender
-        ?UINT32(Uid),       % Real UID of sender
-        ?INT32(Fd),         % File descriptor (SIGIO)
-        ?UINT32(Tid),       % Kernel timer ID (POSIX timers)
-        ?UINT32(Band),      % Band event (SIGIO)
-        ?UINT32(Overrun),   % POSIX timer overrun count
-        ?UINT32(Trapno),    % Trap number that caused signal
-        ?INT32(Status),     % Exit status or signal (SIGCHLD)
-        ?INT32(Int),        % Integer sent by sigqueue(2)
-        ?UINT64(Ptr),       % Pointer sent by sigqueue(2)
-        ?UINT64(Utime),     % User CPU time consumed (SIGCHLD)
-        ?UINT64(Stime),     % System CPU time consumed (SIGCHLD)
-        ?UINT64(Addr),      % Address that generated signal (for hardware-generated signals)
-        Pad/binary          % Pad size to 128 bytes (allow for additional fields in the future)
+        % Signal number
+        ?UINT32(Signo),
+        % Error number (unused)
+        ?INT32(Errno),
+        % Signal code
+        ?INT32(Code),
+        % PID of sender
+        ?UINT32(Pid),
+        % Real UID of sender
+        ?UINT32(Uid),
+        % File descriptor (SIGIO)
+        ?INT32(Fd),
+        % Kernel timer ID (POSIX timers)
+        ?UINT32(Tid),
+        % Band event (SIGIO)
+        ?UINT32(Band),
+        % POSIX timer overrun count
+        ?UINT32(Overrun),
+        % Trap number that caused signal
+        ?UINT32(Trapno),
+        % Exit status or signal (SIGCHLD)
+        ?INT32(Status),
+        % Integer sent by sigqueue(2)
+        ?INT32(Int),
+        % Pointer sent by sigqueue(2)
+        ?UINT64(Ptr),
+        % User CPU time consumed (SIGCHLD)
+        ?UINT64(Utime),
+        % System CPU time consumed (SIGCHLD)
+        ?UINT64(Stime),
+        % Address that generated signal (for hardware-generated signals)
+        ?UINT64(Addr),
+        % Pad size to 128 bytes (allow for additional fields in the future)
+        Pad/binary
     >>.
-
 
 %%--------------------------------------------------------------------
 %%% Internal functions

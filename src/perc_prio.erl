@@ -30,8 +30,7 @@
 
 -export([
     define/1
-    ]).
-
+]).
 
 % Linux
 define(prio_min) -> -20;

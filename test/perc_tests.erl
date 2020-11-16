@@ -36,13 +36,14 @@
 -include_lib("perc/include/perc_signal.hrl").
 
 -define(PRIO_PROCESS, perc_prio:define(prio_process)).
--define(UINT(N,S), N:S/native-unsigned-integer-unit:8).
+-define(UINT(N, S), N:S / native - unsigned - integer - unit:8).
 
 kill_test() ->
     Res = os:cmd("sleep 60 & echo $!"),
     Pid = as_int(Res),
     ok = perc:kill(Pid, 9),
-    timer:sleep(1), % sleep for the process to be reaped
+    % sleep for the process to be reaped
+    timer:sleep(1),
     {error, esrch} = perc:kill(Pid, 9).
 
 kill_errno_test() ->
@@ -50,13 +51,11 @@ kill_errno_test() ->
     {error, eperm} = perc:kill(1, 1).
 
 prlimit_test() ->
-    Fd = <<128:8/native-unsigned-integer-unit:8,
-           128:8/native-unsigned-integer-unit:8>>,
+    Fd = <<128:8/native-unsigned-integer-unit:8, 128:8/native-unsigned-integer-unit:8>>,
 
     case perc:prlimit(0, rlimit_nofile, Fd, <<>>) of
         {error, unsupported} -> ok;
-        {ok, Fd, <<>>} ->
-            {ok, <<>>, Fd} = perc:prlimit(0, rlimit_nofile, <<>>, <<0:128>>)
+        {ok, Fd, <<>>} -> {ok, <<>>, Fd} = perc:prlimit(0, rlimit_nofile, <<>>, <<0:128>>)
     end.
 
 prio_test() ->
@@ -70,14 +69,15 @@ prio_test() ->
     {error, eacces} = perc:setpriority(?PRIO_PROCESS, Pid, -10),
 
     % User may not be allowed to decrease process priority
-    {ok, 15} = case perc:renice({pid, Pid}, "-5") of
-        {ok, 5} ->
-            ok = perc:renice({pid, Pid}, "+10"),
-            perc:getpriority(?PRIO_PROCESS, Pid);
-        {error, eacces} ->
-            ok = perc:renice({pid, Pid}, "+5"),
-            perc:getpriority(?PRIO_PROCESS, Pid)
-    end,
+    {ok, 15} =
+        case perc:renice({pid, Pid}, "-5") of
+            {ok, 5} ->
+                ok = perc:renice({pid, Pid}, "+10"),
+                perc:getpriority(?PRIO_PROCESS, Pid);
+            {error, eacces} ->
+                ok = perc:renice({pid, Pid}, "+5"),
+                perc:getpriority(?PRIO_PROCESS, Pid)
+        end,
 
     ok = perc:kill(Pid, 9).
 
@@ -94,8 +94,8 @@ signalfd_test_create() ->
     {ok, Ref} = perc_signal:start(Signals),
 
     spawn(fun() ->
-                [ perc:kill(0, Signal) || Signal <- Signals ]
-          end),
+        [perc:kill(0, Signal) || Signal <- Signals]
+    end),
 
     signalfd_test_poll(Ref, Signals).
 
@@ -137,7 +137,7 @@ getumask_test() ->
 umask_stress_test() ->
     Self = self(),
     N = 100,
-    [ spawn(fun() -> set_mask(Self, N) end) || _ <- lists:seq(1,100) ],
+    [spawn(fun() -> set_mask(Self, N) end) || _ <- lists:seq(1, 100)],
 
     ok = umask_stress_test_1(N).
 
@@ -145,10 +145,9 @@ umask_stress_test_1(0) ->
     ok;
 umask_stress_test_1(N) ->
     receive
-        ok -> umask_stress_test_1(N-1);
+        ok -> umask_stress_test_1(N - 1);
         error -> umask_race
-    after
-        1000 -> timeout
+    after 1000 -> timeout
     end.
 
 set_mask(Pid, 0) ->
@@ -156,7 +155,7 @@ set_mask(Pid, 0) ->
 set_mask(Pid, N) ->
     case perc:umask() of
         0 -> Pid ! error;
-        _ -> set_mask(Pid, N-1)
+        _ -> set_mask(Pid, N - 1)
     end.
 
 rlimit_test() ->

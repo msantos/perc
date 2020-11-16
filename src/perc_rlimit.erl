@@ -30,8 +30,7 @@
 
 -export([
     define/1
-    ]).
-
+]).
 
 % XXX 64 bit values only supported
 define(rlimit_cpu) -> 0;

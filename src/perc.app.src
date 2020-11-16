@@ -1,9 +1,10 @@
-{application, perc,
-    [{description, "Interface to Unix processes"},
+{application, perc, [
+    {description, "Interface to Unix processes"},
     {vsn, "0.1.0"},
-    {registered,[]},
-    {applications,[kernel,stdlib]},
-    {env,[]},
-    {licenses,["BSD-3"]},
-    {maintainers,["Michael Santos"]},
-    {links,[{"Github","https://github.com/msantos/perc"}]}]}.
+    {registered, []},
+    {applications, [kernel, stdlib]},
+    {env, []},
+    {licenses, ["BSD-3"]},
+    {maintainers, ["Michael Santos"]},
+    {links, [{"Github", "https://github.com/msantos/perc"}]}
+]}.

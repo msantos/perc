@@ -35,7 +35,7 @@
     arch/0, arch/1,
     define/1,
     seccomp_data/1
-    ]).
+]).
 
 arch() ->
     case erlang:system_info(system_architecture) of
@@ -65,15 +65,9 @@ seccomp_data(#seccomp_data{
     arch = Arch,
     instruction_pointer = Ptr,
     args = Args
-    }) ->
-    <<?INT32(NR),
-      ?UINT32(Arch),
-      ?UINT64(Ptr),
-      Args/binary>>;
-seccomp_data(<<?INT32(NR),
-    ?UINT32(Arch),
-    ?UINT64(Ptr),
-    Args/binary>>) ->
+}) ->
+    <<?INT32(NR), ?UINT32(Arch), ?UINT64(Ptr), Args/binary>>;
+seccomp_data(<<?INT32(NR), ?UINT32(Arch), ?UINT64(Ptr), Args/binary>>) ->
     #seccomp_data{
         nr = NR,
         arch = Arch,

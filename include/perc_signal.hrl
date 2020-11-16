@@ -62,23 +62,39 @@
 -define(SIGRTMIN, 34).
 -define(SIGRTMAX, 64).
 
-
 -record(signalfd_siginfo, {
-    ssi_signo = 0,      % Signal number
-    ssi_errno = 0,      % Error number (unused)
-    ssi_code = 0,       % Signal code
-    ssi_pid = 0,        % PID of sender
-    ssi_uid = 0,        % Real UID of sender
-    ssi_fd = 0,         % File descriptor (SIGIO)
-    ssi_tid = 0,        % Kernel timer ID (POSIX timers)
-    ssi_band = 0,       % Band event (SIGIO)
-    ssi_overrun = 0,    % POSIX timer overrun count
-    ssi_trapno = 0,     % Trap number that caused signal
-    ssi_status = 0,     % Exit status or signal (SIGCHLD)
-    ssi_int = 0,        % Integer sent by sigqueue(2)
-    ssi_ptr = 0,        % Pointer sent by sigqueue(2)
-    ssi_utime = 0,      % User CPU time consumed (SIGCHLD)
-    ssi_stime = 0,      % System CPU time consumed (SIGCHLD)
-    ssi_addr = 0,       % Address that generated signal (for hardware-generated signals)
-    pad = 0             % Pad size to 128 bytes (allow for additional fields in the future)
+    % Signal number
+    ssi_signo = 0,
+    % Error number (unused)
+    ssi_errno = 0,
+    % Signal code
+    ssi_code = 0,
+    % PID of sender
+    ssi_pid = 0,
+    % Real UID of sender
+    ssi_uid = 0,
+    % File descriptor (SIGIO)
+    ssi_fd = 0,
+    % Kernel timer ID (POSIX timers)
+    ssi_tid = 0,
+    % Band event (SIGIO)
+    ssi_band = 0,
+    % POSIX timer overrun count
+    ssi_overrun = 0,
+    % Trap number that caused signal
+    ssi_trapno = 0,
+    % Exit status or signal (SIGCHLD)
+    ssi_status = 0,
+    % Integer sent by sigqueue(2)
+    ssi_int = 0,
+    % Pointer sent by sigqueue(2)
+    ssi_ptr = 0,
+    % User CPU time consumed (SIGCHLD)
+    ssi_utime = 0,
+    % System CPU time consumed (SIGCHLD)
+    ssi_stime = 0,
+    % Address that generated signal (for hardware-generated signals)
+    ssi_addr = 0,
+    % Pad size to 128 bytes (allow for additional fields in the future)
+    pad = 0
 }).
