@@ -119,14 +119,14 @@ static ERL_NIF_TERM nif_kill(ErlNifEnv *env, int argc,
 static ERL_NIF_TERM nif_getpriority(ErlNifEnv *env, int argc,
                                     const ERL_NIF_TERM argv[]) {
   int which = 0;
-  int who = 0;
+  unsigned int who = 0;
 
   int prio = 0;
 
   if (!enif_get_int(env, argv[0], &which))
     return enif_make_badarg(env);
 
-  if (!enif_get_int(env, argv[1], &who))
+  if (!enif_get_uint(env, argv[1], &who))
     return enif_make_badarg(env);
 
   errno = 0;
@@ -140,13 +140,13 @@ static ERL_NIF_TERM nif_getpriority(ErlNifEnv *env, int argc,
 static ERL_NIF_TERM nif_setpriority(ErlNifEnv *env, int argc,
                                     const ERL_NIF_TERM argv[]) {
   int which = 0;
-  int who = 0;
+  unsigned int who = 0;
   int prio = 0;
 
   if (!enif_get_int(env, argv[0], &which))
     return enif_make_badarg(env);
 
-  if (!enif_get_int(env, argv[1], &who))
+  if (!enif_get_uint(env, argv[1], &who))
     return enif_make_badarg(env);
 
   if (!enif_get_int(env, argv[2], &prio))
