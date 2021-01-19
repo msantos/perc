@@ -1,4 +1,4 @@
-%%% @copyright 2012-2020 Michael Santos <michael.santos@gmail.com>
+%%% @copyright 2012-2021 Michael Santos <michael.santos@gmail.com>
 
 %%% Redistribution and use in source and binary forms, with or without
 %%% modification, are permitted provided that the following conditions
@@ -30,6 +30,8 @@
 
 -export([
     kill/2,
+
+    getuid/0,
 
     renice/2,
     getpriority/2,
@@ -244,6 +246,11 @@ getpriority(_, _) ->
 %% group or user.
 -spec setpriority(int32_t(), int32_t(), int32_t()) -> ok | {error, posix()}.
 setpriority(_, _, _) ->
+    erlang:nif_error(not_implemented).
+
+%% @doc getuid(2): get user identity
+-spec getuid() -> uint32_t().
+getuid() ->
     erlang:nif_error(not_implemented).
 
 %% @doc renice: reset the process priority

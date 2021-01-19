@@ -20,6 +20,12 @@ perc is an Erlang interface for controlling Unix processes.
 
         Sending a signal to PID 0 will send the signal to the Erlang VM.
 
+    getuid() -> uint32_t()
+
+        See getuid(2).
+
+        Get user identity.
+
     getpriority(Which, Who) -> {ok, integer()} | {error, posix()}
 
         Types   Which = integer()

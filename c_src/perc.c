@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020 Michael Santos <michael.santos@gmail.com>
+ * Copyright (c) 2012-2021 Michael Santos <michael.santos@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -391,10 +391,17 @@ static ERL_NIF_TERM nif_umask1(ErlNifEnv *env, int argc,
   return enif_make_uint(env, omask);
 }
 
+static ERL_NIF_TERM nif_getuid(ErlNifEnv *env, int argc,
+                               const ERL_NIF_TERM argv[]) {
+  return enif_make_uint(env, getuid());
+}
+
 static ErlNifFunc nif_funcs[] = {{"kill_nif", 2, nif_kill},
 
                                  {"getpriority", 2, nif_getpriority},
                                  {"setpriority", 3, nif_setpriority},
+
+                                 {"getuid", 0, nif_getuid},
 
                                  {"prlimit_nif", 4, nif_prlimit},
                                  {"getrlimit_nif", 2, nif_getrlimit},
