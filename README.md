@@ -26,6 +26,12 @@ perc is an Erlang interface for controlling Unix processes.
 
         Get user identity.
 
+    getgid() -> uint32_t()
+
+        See getgid(2).
+
+        Get user group.
+
     getpriority(Which, Who) -> {ok, integer()} | {error, posix()}
 
         Types   Which = integer()

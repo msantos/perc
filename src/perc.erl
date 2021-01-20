@@ -32,6 +32,7 @@
     kill/2,
 
     getuid/0,
+    getgid/0,
 
     renice/2,
     getpriority/2,
@@ -251,6 +252,11 @@ setpriority(_, _, _) ->
 %% @doc getuid(2): get user identity
 -spec getuid() -> uint32_t().
 getuid() ->
+    erlang:nif_error(not_implemented).
+
+%% @doc getgid(2): get group identity
+-spec getgid() -> uint32_t().
+getgid() ->
     erlang:nif_error(not_implemented).
 
 %% @doc renice: reset the process priority
