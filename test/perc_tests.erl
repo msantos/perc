@@ -1,4 +1,4 @@
-%% Copyright (c) 2012-2020, Michael Santos <michael.santos@gmail.com>
+%% Copyright (c) 2012-2021, Michael Santos <michael.santos@gmail.com>
 %% All rights reserved.
 %%
 %% Redistribution and use in source and binary forms, with or without
@@ -174,3 +174,9 @@ rlimit_test() ->
     {error, eperm} = perc:setrlimit(rlimit_nofile, Limit2),
 
     ok.
+
+getuid_test() ->
+    true = is_integer(perc:getuid()).
+
+getgid_test() ->
+    true = is_integer(perc:getgid()).
