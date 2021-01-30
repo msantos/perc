@@ -178,5 +178,8 @@ rlimit_test() ->
 getuid_test() ->
     true = is_integer(perc:getuid()).
 
+geteuid_test() ->
+    true = is_integer(perc:geteuid()).
+
 getgid_test() ->
     true = is_integer(perc:getgid()).

@@ -396,6 +396,11 @@ static ERL_NIF_TERM nif_getuid(ErlNifEnv *env, int argc,
   return enif_make_uint(env, getuid());
 }
 
+static ERL_NIF_TERM nif_geteuid(ErlNifEnv *env, int argc,
+                                const ERL_NIF_TERM argv[]) {
+  return enif_make_uint(env, geteuid());
+}
+
 static ERL_NIF_TERM nif_getgid(ErlNifEnv *env, int argc,
                                const ERL_NIF_TERM argv[]) {
   return enif_make_uint(env, getgid());
@@ -407,6 +412,7 @@ static ErlNifFunc nif_funcs[] = {{"kill_nif", 2, nif_kill},
                                  {"setpriority", 3, nif_setpriority},
 
                                  {"getuid", 0, nif_getuid},
+                                 {"geteuid", 0, nif_geteuid},
                                  {"getgid", 0, nif_getgid},
 
                                  {"prlimit_nif", 4, nif_prlimit},

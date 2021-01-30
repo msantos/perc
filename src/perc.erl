@@ -32,6 +32,7 @@
     kill/2,
 
     getuid/0,
+    geteuid/0,
     getgid/0,
 
     renice/2,
@@ -252,6 +253,11 @@ setpriority(_, _, _) ->
 %% @doc getuid(2): get user identity
 -spec getuid() -> uint32_t().
 getuid() ->
+    erlang:nif_error(not_implemented).
+
+%% @doc geteuid(2): get effective user id
+-spec geteuid() -> uint32_t().
+geteuid() ->
     erlang:nif_error(not_implemented).
 
 %% @doc getgid(2): get group identity
