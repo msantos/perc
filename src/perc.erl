@@ -34,6 +34,7 @@
     getuid/0,
     geteuid/0,
     getgid/0,
+    getegid/0,
 
     renice/2,
     getpriority/2,
@@ -263,6 +264,11 @@ geteuid() ->
 %% @doc getgid(2): get group identity
 -spec getgid() -> uint32_t().
 getgid() ->
+    erlang:nif_error(not_implemented).
+
+%% @doc getegid(2): get effective group id
+-spec getegid() -> uint32_t().
+getegid() ->
     erlang:nif_error(not_implemented).
 
 %% @doc renice: reset the process priority

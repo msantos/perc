@@ -183,3 +183,6 @@ geteuid_test() ->
 
 getgid_test() ->
     true = is_integer(perc:getgid()).
+
+getegid_test() ->
+    true = is_integer(perc:getegid()).
