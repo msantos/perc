@@ -28,6 +28,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#define _GNU_SOURCE
 #include <sys/types.h>
 
 #include <errno.h>
@@ -411,6 +412,28 @@ static ERL_NIF_TERM nif_getegid(ErlNifEnv *env, int argc,
   return enif_make_uint(env, getegid());
 }
 
+static ERL_NIF_TERM nif_setresuid(ErlNifEnv *env, int argc,
+                                  const ERL_NIF_TERM argv[]) {
+  u_int32_t ruid;
+  u_int32_t euid;
+  u_int32_t suid;
+
+  if (!enif_get_uint(env, argv[0], &ruid))
+    return enif_make_badarg(env);
+
+  if (!enif_get_uint(env, argv[1], &euid))
+    return enif_make_badarg(env);
+
+  if (!enif_get_uint(env, argv[2], &suid))
+    return enif_make_badarg(env);
+
+  if (setresuid(ruid, euid, suid) != 0)
+    return enif_make_tuple2(env, atom_error,
+                            enif_make_atom(env, erl_errno_id(errno)));
+
+  return atom_ok;
+}
+
 static ErlNifFunc nif_funcs[] = {{"kill_nif", 2, nif_kill},
 
                                  {"getpriority", 2, nif_getpriority},
@@ -420,6 +443,8 @@ static ErlNifFunc nif_funcs[] = {{"kill_nif", 2, nif_kill},
                                  {"geteuid", 0, nif_geteuid},
                                  {"getgid", 0, nif_getgid},
                                  {"getegid", 0, nif_getegid},
+
+                                 {"setresuid", 3, nif_setresuid},
 
                                  {"prlimit_nif", 4, nif_prlimit},
                                  {"getrlimit_nif", 2, nif_getrlimit},

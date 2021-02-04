@@ -44,6 +44,16 @@ perc is an Erlang interface for controlling Unix processes.
 
         Get effective group id.
 
+    setresuid(Ruid, Euid, Suid) -> ok | {error, posix()}
+
+        Types   Ruid = uint32_t()
+                Euid = uint32_t()
+                Suid = uint32_t()
+
+        See setresuid(2).
+
+        Set real, effective and saved user id
+
     getpriority(Which, Who) -> {ok, integer()} | {error, posix()}
 
         Types   Which = integer()

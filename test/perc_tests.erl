@@ -186,3 +186,16 @@ getgid_test() ->
 
 getegid_test() ->
     true = is_integer(perc:getegid()).
+
+setresuid_test() ->
+    % If  one  of  the arguments equals -1, the corresponding value is
+    % not changed.
+    % setresuid(-1, -1, -1)
+    Minus1 = 16#ffffffff,
+    ok = perc:setresuid(Minus1, Minus1, Minus1),
+
+    Uid = perc:getuid(),
+    Euid = perc:geteuid(),
+    ok = perc:setresuid(Uid, Euid, Uid),
+
+    {error, eperm} = perc:setresuid(1, 1, 1).
