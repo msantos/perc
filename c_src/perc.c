@@ -412,6 +412,43 @@ static ERL_NIF_TERM nif_getegid(ErlNifEnv *env, int argc,
   return enif_make_uint(env, getegid());
 }
 
+static ERL_NIF_TERM nif_getgroups(ErlNifEnv *env, int argc,
+                                  const ERL_NIF_TERM argv[]) {
+  int size;
+  int n;
+  int errnum;
+  gid_t *list;
+  ERL_NIF_TERM groups = {0};
+
+  size = getgroups(0, NULL);
+  if (size < 0)
+    return enif_make_tuple2(env, atom_error,
+                            enif_make_atom(env, erl_errno_id(errno)));
+
+  list = enif_alloc((size_t)size * sizeof(gid_t));
+  if (list == NULL)
+    return enif_make_tuple2(env, atom_error,
+                            enif_make_atom(env, erl_errno_id(errno)));
+
+  n = getgroups(size, list);
+  if (n < 0) {
+    errnum = errno;
+    enif_free(list);
+    return enif_make_tuple2(env, atom_error,
+                            enif_make_atom(env, erl_errno_id(errnum)));
+  }
+
+  groups = enif_make_list(env, 0);
+
+  while (size--) {
+    groups = enif_make_list_cell(env, enif_make_uint(env, list[size]), groups);
+  }
+
+  enif_free(list);
+
+  return enif_make_tuple2(env, atom_ok, groups);
+}
+
 static ERL_NIF_TERM nif_setresuid(ErlNifEnv *env, int argc,
                                   const ERL_NIF_TERM argv[]) {
   u_int32_t ruid;
@@ -443,6 +480,8 @@ static ErlNifFunc nif_funcs[] = {{"kill_nif", 2, nif_kill},
                                  {"geteuid", 0, nif_geteuid},
                                  {"getgid", 0, nif_getgid},
                                  {"getegid", 0, nif_getegid},
+
+                                 {"getgroups", 0, nif_getgroups},
 
                                  {"setresuid", 3, nif_setresuid},
 

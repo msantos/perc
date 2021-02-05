@@ -187,6 +187,10 @@ getgid_test() ->
 getegid_test() ->
     true = is_integer(perc:getegid()).
 
+getgroups_test() ->
+    [Gid|_] = perc:getgroups(),
+    true = is_integer(Gid).
+
 setresuid_test() ->
     % If  one  of  the arguments equals -1, the corresponding value is
     % not changed.

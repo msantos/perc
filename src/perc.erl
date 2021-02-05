@@ -36,6 +36,8 @@
     getgid/0,
     getegid/0,
 
+    getgroups/0,
+
     setresuid/3,
 
     renice/2,
@@ -271,6 +273,11 @@ getgid() ->
 %% @doc getegid(2): get effective group id
 -spec getegid() -> uint32_t().
 getegid() ->
+    erlang:nif_error(not_implemented).
+
+%% @doc getgroups(2): retrieve the list of supplementary groups
+-spec getgroups() -> [uint32_t()].
+getgroups() ->
     erlang:nif_error(not_implemented).
 
 %% @doc setresuid(2): set real, effective and saved user id
