@@ -39,6 +39,7 @@
     getgroups/0,
 
     setresuid/3,
+    setresgid/3,
 
     renice/2,
     getpriority/2,
@@ -283,6 +284,11 @@ getgroups() ->
 %% @doc setresuid(2): set real, effective and saved user id
 -spec setresuid(uint32_t(), uint32_t(), uint32_t()) -> ok | {error, posix()}.
 setresuid(_, _, _) ->
+    erlang:nif_error(not_implemented).
+
+%% @doc setresgid(2): set real, effective and saved group id
+-spec setresgid(uint32_t(), uint32_t(), uint32_t()) -> ok | {error, posix()}.
+setresgid(_, _, _) ->
     erlang:nif_error(not_implemented).
 
 %% @doc renice: reset the process priority

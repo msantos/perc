@@ -471,6 +471,28 @@ static ERL_NIF_TERM nif_setresuid(ErlNifEnv *env, int argc,
   return atom_ok;
 }
 
+static ERL_NIF_TERM nif_setresgid(ErlNifEnv *env, int argc,
+                                  const ERL_NIF_TERM argv[]) {
+  u_int32_t rgid;
+  u_int32_t egid;
+  u_int32_t sgid;
+
+  if (!enif_get_uint(env, argv[0], &rgid))
+    return enif_make_badarg(env);
+
+  if (!enif_get_uint(env, argv[1], &egid))
+    return enif_make_badarg(env);
+
+  if (!enif_get_uint(env, argv[2], &sgid))
+    return enif_make_badarg(env);
+
+  if (setresgid(rgid, egid, sgid) != 0)
+    return enif_make_tuple2(env, atom_error,
+                            enif_make_atom(env, erl_errno_id(errno)));
+
+  return atom_ok;
+}
+
 static ErlNifFunc nif_funcs[] = {{"kill_nif", 2, nif_kill},
 
                                  {"getpriority", 2, nif_getpriority},
@@ -484,6 +506,7 @@ static ErlNifFunc nif_funcs[] = {{"kill_nif", 2, nif_kill},
                                  {"getgroups", 0, nif_getgroups},
 
                                  {"setresuid", 3, nif_setresuid},
+                                 {"setresgid", 3, nif_setresgid},
 
                                  {"prlimit_nif", 4, nif_prlimit},
                                  {"getrlimit_nif", 2, nif_getrlimit},

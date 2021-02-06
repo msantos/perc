@@ -188,14 +188,17 @@ getegid_test() ->
     true = is_integer(perc:getegid()).
 
 getgroups_test() ->
-    [Gid|_] = perc:getgroups(),
+    {ok, [Gid | _]} = perc:getgroups(),
     true = is_integer(Gid).
 
 setresuid_test() ->
     % If  one  of  the arguments equals -1, the corresponding value is
     % not changed.
-    % setresuid(-1, -1, -1)
+
+    % (uint32_t)-1
     Minus1 = 16#ffffffff,
+
+    % setresuid(-1, -1, -1)
     ok = perc:setresuid(Minus1, Minus1, Minus1),
 
     Uid = perc:getuid(),
@@ -203,3 +206,19 @@ setresuid_test() ->
     ok = perc:setresuid(Uid, Euid, Uid),
 
     {error, eperm} = perc:setresuid(1, 1, 1).
+
+setresgid_test() ->
+    % If  one  of  the arguments equals -1, the corresponding value is
+    % not changed.
+
+    % (uint32_t)-1
+    Minus1 = 16#ffffffff,
+
+    % setresgid(-1, -1, -1)
+    ok = perc:setresgid(Minus1, Minus1, Minus1),
+
+    Gid = perc:getgid(),
+    Egid = perc:getegid(),
+    ok = perc:setresgid(Gid, Egid, Gid),
+
+    {error, eperm} = perc:setresgid(1, 1, 1).
