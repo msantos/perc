@@ -44,11 +44,17 @@ perc is an Erlang interface for controlling Unix processes.
 
         Get effective group id.
 
-    getgroups() -> uint32_t()
+    getgroups() -> [uint32_t()]
 
         See getgroups(2).
 
         Retrieve the list of supplementary groups.
+
+    setgroups([uint32_t()]) -> ok | {error, posix()}
+
+        See setgroups(2).
+
+        Set the list of supplementary groups.
 
     setresuid(Ruid, Euid, Suid) -> ok | {error, posix()}
 

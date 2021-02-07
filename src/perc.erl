@@ -37,6 +37,7 @@
     getegid/0,
 
     getgroups/0,
+    setgroups/1,
 
     setresuid/3,
     setresgid/3,
@@ -279,6 +280,11 @@ getegid() ->
 %% @doc getgroups(2): retrieve the list of supplementary groups
 -spec getgroups() -> [uint32_t()].
 getgroups() ->
+    erlang:nif_error(not_implemented).
+
+%% @doc setgroups(2): set the list of supplementary groups
+-spec setgroups([uint32_t()]) -> ok | {error, posix()}.
+setgroups(_) ->
     erlang:nif_error(not_implemented).
 
 %% @doc setresuid(2): set real, effective and saved user id

@@ -191,6 +191,12 @@ getgroups_test() ->
     {ok, [Gid | _]} = perc:getgroups(),
     true = is_integer(Gid).
 
+setgroups_test() ->
+    {ok, Groups} = perc:getgroups(),
+    {error, eperm} = perc:setgroups([]),
+    {error, eperm} = perc:setgroups(Groups),
+    {error, eperm} = perc:setgroups([0, 1, 2, 3, 4]).
+
 setresuid_test() ->
     % If  one  of  the arguments equals -1, the corresponding value is
     % not changed.

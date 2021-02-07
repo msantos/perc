@@ -32,6 +32,7 @@
 #include <sys/types.h>
 
 #include <errno.h>
+#include <grp.h>
 #include <signal.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -449,6 +450,57 @@ static ERL_NIF_TERM nif_getgroups(ErlNifEnv *env, int argc,
   return enif_make_tuple2(env, atom_ok, groups);
 }
 
+static ERL_NIF_TERM nif_setgroups(ErlNifEnv *env, int argc,
+                                  const ERL_NIF_TERM argv[]) {
+  ERL_NIF_TERM head;
+  ERL_NIF_TERM tail;
+  unsigned int len = 0;
+  size_t size;
+  gid_t *list = NULL;
+  int rv;
+
+  if (!enif_is_list(env, argv[0]))
+    return enif_make_badarg(env);
+
+  if (!enif_get_list_length(env, argv[0], &len))
+    return enif_make_badarg(env);
+
+  tail = argv[0];
+  size = len;
+
+  if (size > 0) {
+    list = enif_alloc((size_t)len * sizeof(gid_t));
+    if (list == NULL)
+      return enif_make_tuple2(env, atom_error,
+                              enif_make_atom(env, erl_errno_id(errno)));
+
+    while (enif_get_list_cell(env, tail, &head, &tail)) {
+      unsigned int gid = 0;
+
+      if (!enif_get_uint(env, head, &gid)) {
+        enif_free(list);
+        return enif_make_badarg(env);
+      }
+
+      if (len == 0) {
+        enif_free(list);
+        return enif_make_badarg(env);
+      }
+
+      list[--len] = (gid_t)gid;
+    }
+  }
+
+  rv = setgroups(size, list);
+  if (rv < 0) {
+    enif_free(list);
+    return enif_make_tuple2(env, atom_error,
+                            enif_make_atom(env, erl_errno_id(errno)));
+  }
+
+  return atom_ok;
+}
+
 static ERL_NIF_TERM nif_setresuid(ErlNifEnv *env, int argc,
                                   const ERL_NIF_TERM argv[]) {
   u_int32_t ruid;
@@ -504,6 +556,7 @@ static ErlNifFunc nif_funcs[] = {{"kill_nif", 2, nif_kill},
                                  {"getegid", 0, nif_getegid},
 
                                  {"getgroups", 0, nif_getgroups},
+                                 {"setgroups", 1, nif_setgroups},
 
                                  {"setresuid", 3, nif_setresuid},
                                  {"setresgid", 3, nif_setresgid},
