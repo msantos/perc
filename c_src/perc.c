@@ -42,17 +42,11 @@
 #include <sys/time.h>
 
 #ifdef HAVE_SIGNALFD
-#pragma message "Enabling support for signalfd(2)"
 #include <sys/signalfd.h>
 #endif
 
 #ifdef HAVE_PRCTL
 #include <sys/prctl.h>
-#pragma message "Enabling support for prctl(2)"
-#endif
-
-#ifdef HAVE_PRLIMIT
-#pragma message "Enabling support for prlimit(2)"
 #endif
 
 #include "erl_nif.h"
