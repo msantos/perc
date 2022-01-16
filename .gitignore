@@ -3,4 +3,5 @@
 *.swp
 ebin/
 priv/
+doc/
 _build
